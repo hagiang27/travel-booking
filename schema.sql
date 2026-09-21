@@ -51,8 +51,11 @@ CREATE TABLE LichKhaDung (
     id INT AUTO_INCREMENT PRIMARY KEY,
     dich_vu_id INT NOT NULL,
     ngay DATE NOT NULL,
-    so_luong_con_trong INT NOT NULL CHECK (so_luong_con_trong >= 0),
-    FOREIGN KEY (dich_vu_id) REFERENCES DichVu(id)
+    so_luong_tong INT NOT NULL,
+    so_luong_dang_giu INT NOT NULL DEFAULT 0,
+    so_luong_da_ban INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (dich_vu_id) REFERENCES DichVu(id),
+    CONSTRAINT chk_khadung CHECK (so_luong_dang_giu + so_luong_da_ban <= so_luong_tong)
 );
 
 CREATE TABLE GioHang (
