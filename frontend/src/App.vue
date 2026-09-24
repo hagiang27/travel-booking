@@ -1,7 +1,9 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <div id="app">
+    <nav>
+      <router-link to="/">Trang chủ</router-link> |
+      <router-link to="/san-pham">Sản phẩm</router-link>
+    </nav>
+    <router-view />
+  </div>
 </template>
