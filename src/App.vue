@@ -1,32 +1,83 @@
 <template>
   <div class="app">
     <header class="header">
-      <h1>Nhà Việt</h1>
+      <div class="brand">
+        <h1>Nhà Việt</h1>
+      </div>
 
-      <button class="theme-button" @click="toggleTheme">
+      <nav class="navigation" aria-label="Điều hướng chính">
+        <button
+          type="button"
+          :class="{ active: currentPage === 'home' }"
+          @click="currentPage = 'home'"
+        >
+          Trang chủ
+        </button>
+
+        <button
+          type="button"
+          :class="{ active: currentPage === 'products' }"
+          @click="currentPage = 'products'"
+        >
+          Sản phẩm
+        </button>
+
+        <button
+          type="button"
+          :class="{ active: currentPage === 'detail' }"
+          @click="currentPage = 'detail'"
+        >
+          Chi tiết
+        </button>
+
+        <button
+          type="button"
+          :class="{ active: currentPage === 'login' }"
+          @click="currentPage = 'login'"
+        >
+          Đăng nhập
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        class="theme-button"
+        :aria-label="
+          isDark
+            ? 'Chuyển sang giao diện sáng'
+            : 'Chuyển sang giao diện tối'
+        "
+        @click="toggleTheme"
+      >
         {{ isDark ? '☀️ Light' : '🌙 Dark' }}
       </button>
     </header>
 
-    <main class="container">
-      <section class="card">
-        <h2>Design Token Test</h2>
+    <main>
+      <Home v-if="currentPage === 'home'" />
 
-        <p>
-          Giao diện sử dụng hệ thống Design Tokens của Buổi 4.
-        </p>
+      <ProductList
+        v-else-if="currentPage === 'products'"
+      />
 
-        <button class="primary-button">
-          Xem sản phẩm
-        </button>
-      </section>
+      <ProductDetail
+        v-else-if="currentPage === 'detail'"
+      />
+
+      <Login v-else />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
+import Home from './pages/Home.vue'
+import ProductList from './pages/ProductList.vue'
+import ProductDetail from './pages/ProductDetail.vue'
+import Login from './pages/Login.vue'
+
+const currentPage = ref('home')
 const isDark = ref(false)
 
 function toggleTheme() {
@@ -39,7 +90,10 @@ function toggleTheme() {
 }
 
 onMounted(() => {
-  document.documentElement.setAttribute('data-theme', 'light')
+  document.documentElement.setAttribute(
+    'data-theme',
+    'light'
+  )
 })
 </script>
 
@@ -53,59 +107,79 @@ onMounted(() => {
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--space-4) var(--space-8);
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--color-border);
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: var(--space-8);
-}
-
-.card {
-  padding: var(--space-8);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
 }
 
-h1,
-h2 {
-  margin-top: 0;
+.brand h1 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
 }
 
-p {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-md);
+.navigation {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
-.primary-button,
+.navigation button,
 .theme-button {
-  padding: var(--space-3) var(--space-4);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-small);
   cursor: pointer;
 }
 
-.primary-button {
-  margin-top: var(--space-4);
-  border: none;
-  background: var(--color-primary);
-  color: white;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+.navigation button:hover,
+.theme-button:hover {
+  background: var(--color-surface-2);
 }
 
-.primary-button:hover {
-  background: var(--color-primary-hover);
+.navigation button:focus-visible,
+.theme-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.navigation button.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg);
 }
 
 .theme-button {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .navigation {
+    width: 100%;
+    justify-content: center;
+    order: 3;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .navigation button,
+  .theme-button {
+    padding: 0 var(--space-3);
+  }
 }
 </style>
