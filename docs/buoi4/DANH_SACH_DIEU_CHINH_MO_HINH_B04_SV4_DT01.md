@@ -48,4 +48,34 @@ API so sánh không nên chỉ trả `giá cơ bản`. Cần có đủ dữ li�
 Đối chiếu `chi_so_minh_bach_gia` với API. Không được nhầm điểm minh bạch của nhà cung cấp với giá sản phẩm.
 
 ## 5. Kết luận cần ghi trong biên bản
-Sau khi V3 hoàn thành bản hợp đồng API 0.1, SV4 đối chiếu từng
+Sau khi V3 hoàn thành bản hợp đồng API 0.1, SV4 đối chiếu từng  endpoint với các bảng/cột thật trong `database/schema.sql` và các bảng bổ sung DT-01. Mọi trường API không có nguồn dữ liệu phải được ghi vào danh sách điều chỉnh thay vì tự suy đoán.
+
+## 6. Phát hiện quan trọng bổ sung (V2 rà soát trên API v0.1 thực tế)
+
+### 6.1. Thiếu cột dữ liệu — đã xử lý
+API đăng ký/đăng nhập cần trường "mật khẩu", nhưng bảng `nguoi_dung` không có cột này (cố ý trong bộ dữ liệu mẫu, buộc nhóm tự bổ sung đúng yêu cầu bảo mật Mục 2.2 Đề thi). Đã xử lý bằng lệnh:
+
+```sql
+ALTER TABLE nguoi_dung
+  ADD COLUMN mat_khau_hash VARCHAR(255) NOT NULL DEFAULT ''
+  AFTER thu_dien_tu_mo_phong;
+```
+
+Đã kiểm tra lại trong phpMyAdmin, cột mới xuất hiện đúng vị trí.
+
+### 6.2. Thiếu 7 endpoint cho chức năng trọng tâm ĐT-01
+File `API_v0.1.md` hiện chỉ có 3 nhóm (Điểm đến, Sản phẩm, Xác thực), còn thiếu các endpoint sau, cần bổ sung ở phiên bản tiếp theo:
+
+- `GET /api/so-sanh-gia` (CN-04, trọng tâm đề tài)
+- `GET /api/san-pham/{ma}/phu-thu` (CN-02)
+- `POST /api/don-dat` (CN-05)
+- `POST /api/thanh-toan` (CN-06)
+- `PUT /api/admin/nha-cung-cap/{ma}/duyet` (CN-01)
+- `GET /api/chi-so-minh-bach/{ma_ncc}` (thách thức nâng cao)
+- `POST /api/danh-gia` (CN-07)
+
+Đã báo V3 bổ sung ở phiên bản tiếp theo.
+
+## 7. Đầu ra cá nhân
+- File này: danh sách điều chỉnh mô hình.
+- File `CHECKLIST_KIEMTHU_B04_SV4_DT01.xlsx`: 60 ca kiểm thử, phân bổ đúng 9 mô-đun.
