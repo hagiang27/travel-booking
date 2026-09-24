@@ -1,0 +1,72 @@
+
+=== 1. KHOI LUONG DU LIEU ===
+     diem_den                 76
+     nha_cung_cap             24
+     nguoi_dung              110
+     san_pham                140
+     gia_theo_mua            560
+     lich_kha_dung          2150
+     don_dat                 260
+     chi_tiet_don            365
+     thanh_toan              209
+     danh_gia                 88
+     bai_viet                 60
+     nhat_ky_he_thong        200
+ĐẠT    | Tổng số bản ghi >= 300 (Mục 2.2 Đề thi) 
+ĐẠT    | Số thực thể >= 10 
+
+=== 2. KHOA CHINH DUY NHAT ===
+ĐẠT    | Khóa chính diem_den.ma_diem_den duy nhất 
+ĐẠT    | Khóa chính nha_cung_cap.ma_ncc duy nhất 
+ĐẠT    | Khóa chính nguoi_dung.ma_nguoi_dung duy nhất 
+ĐẠT    | Khóa chính san_pham.ma_san_pham duy nhất 
+ĐẠT    | Khóa chính gia_theo_mua.ma_gia_mua duy nhất 
+ĐẠT    | Khóa chính lich_kha_dung.ma_lich duy nhất 
+ĐẠT    | Khóa chính don_dat.ma_don duy nhất 
+ĐẠT    | Khóa chính chi_tiet_don.ma_chi_tiet duy nhất 
+ĐẠT    | Khóa chính thanh_toan.ma_thanh_toan duy nhất 
+ĐẠT    | Khóa chính danh_gia.ma_danh_gia duy nhất 
+ĐẠT    | Khóa chính bai_viet.ma_bai_viet duy nhất 
+ĐẠT    | Khóa chính nhat_ky_he_thong.ma_nhat_ky duy nhất 
+
+=== 3. TOAN VEN THAM CHIEU ===
+ĐẠT    | san_pham.ma_ncc -> nha_cung_cap.ma_ncc 
+ĐẠT    | san_pham.ma_diem_den -> diem_den.ma_diem_den 
+ĐẠT    | gia_theo_mua.ma_san_pham -> san_pham.ma_san_pham 
+ĐẠT    | lich_kha_dung.ma_san_pham -> san_pham.ma_san_pham 
+ĐẠT    | don_dat.ma_nguoi_dung -> nguoi_dung.ma_nguoi_dung 
+ĐẠT    | chi_tiet_don.ma_don -> don_dat.ma_don 
+ĐẠT    | chi_tiet_don.ma_san_pham -> san_pham.ma_san_pham 
+ĐẠT    | chi_tiet_don.ma_lich -> lich_kha_dung.ma_lich 
+ĐẠT    | thanh_toan.ma_don -> don_dat.ma_don 
+ĐẠT    | danh_gia.ma_san_pham -> san_pham.ma_san_pham 
+ĐẠT    | danh_gia.ma_don -> don_dat.ma_don 
+ĐẠT    | bai_viet.ma_diem_den -> diem_den.ma_diem_den 
+
+=== 4. RANG BUOC NGHIEP VU ===
+ĐẠT    | lich_kha_dung: con_lai = tong_cho - da_dat 
+ĐẠT    | lich_kha_dung: da_dat <= tong_cho 
+ĐẠT    | lich_kha_dung: con_lai >= 0 
+ĐẠT    | chi_tiet_don: thanh_tien = so_luong * don_gia 
+ĐẠT    | chi_tiet_don: so_luong > 0 
+ĐẠT    | don_dat.tong_tien khớp tổng chi tiết 
+ĐẠT    | danh_gia: điểm trong [1..5] 
+ĐẠT    | danh_gia chỉ thuộc đơn đã hoàn tất 
+ĐẠT    | san_pham: gia_co_ban > 0 
+ĐẠT    | san_pham: suc_chua_toi_da > 0 
+ĐẠT    | san_pham.so_luot_danh_gia khớp số đánh giá đã duyệt 
+ĐẠT    | gia_theo_mua: mỗi sản phẩm đủ 04 mùa 
+
+=== 5. TINH DAY DU VA HOP LE ===
+ĐẠT    | diem_den: vĩ độ trong [8.0, 24.0] 
+ĐẠT    | diem_den: kinh độ trong [102.0, 110.0] 
+ĐẠT    | diem_den: đường dẫn tĩnh duy nhất 
+ĐẠT    | nguoi_dung: tên đăng nhập duy nhất 
+ĐẠT    | nguoi_dung: có đủ 05 vai trò 
+ĐẠT    | nguoi_dung: KHÔNG chứa cột mật khẩu 
+ĐẠT    | thanh_toan: chỉ có mã giao dịch môi trường thử nghiệm 
+ĐẠT    | nhat_ky_he_thong: có bản ghi mức warning 
+
+==============================================================
+KET LUAN: DAT — toan bo phep kiem dinh thanh cong.
+Tong so ban ghi: 4242
