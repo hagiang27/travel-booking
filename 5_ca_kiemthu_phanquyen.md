@@ -1,3 +1,5 @@
+cat > 5\_ca\_kiemthu\_phanquyen.md << 'EOF'
+
 \# 5 ca kiem thu phan quyen - Buoi 5 (V5 - SV4)
 
 
@@ -87,4 +89,6 @@ chuyen huong ve trang dang nhap.
 Ket qua thuc te: \[dien sau khi test]
 
 Trang thai: \[Dat / Khong dat]
+
+EOF
 
