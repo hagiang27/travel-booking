@@ -1,4 +1,4 @@
-cat > ket\_qua\_du\_lieu\_buoi5.md << 'EOF'
+&#x20;cat > ket\_qua\_du\_lieu\_buoi5.md << 'EOF'
 
 \# Ket qua nap va kiem tra du lieu mau - Buoi 5 (V2 - SV4)
 
@@ -37,4 +37,6 @@ DT-01) tu Buoi 3. He thong (khi V3/V4 hoan thien trang danh muc) se doc
 truc tiep tu cung mot co so du lieu nay, khong can nap them dot moi.
 
 EOF
+
+
 
