@@ -79,73 +79,103 @@ class AuthController extends Controller
      * Đăng nhập
      */
     public function dangNhap(Request $request)
-    {
-        $validated = $request->validate([
-            'ten_dang_nhap' => 'required|string',
-            'mat_khau' => 'required|string',
-        ]);
+{
+    $validated = $request->validate([
+        'ten_dang_nhap' => 'required|string',
+        'mat_khau' => 'required|string',
+    ]);
 
-        $nguoiDung = DB::table('nguoi_dung')
-            ->where('ten_dang_nhap', $validated['ten_dang_nhap'])
-            ->first();
+    $nguoiDung = DB::table('nguoi_dung')
+        ->where('ten_dang_nhap', $validated['ten_dang_nhap'])
+        ->first();
 
-        // Không tìm thấy tài khoản hoặc sai mật khẩu
-        if (
-            !$nguoiDung ||
-            !Hash::check($validated['mat_khau'], $nguoiDung->mat_khau_hash)
-        ) {
-            return response()->json([
-                'message' => 'Sai tên đăng nhập hoặc mật khẩu'
-            ], 401);
-        }
-
-        // Kiểm tra tài khoản có đang bị khóa hay không
-        if ($nguoiDung->trang_thai !== 'kich_hoat') {
-            return response()->json([
-                'message' => 'Tài khoản đã bị khóa'
-            ], 403);
-        }
-
-        // Tạo session mới để tránh session fixation
-        $request->session()->regenerate();
-
-        // Lưu thông tin người dùng vào session
-        $request->session()->put(
-            'ma_nguoi_dung',
-            $nguoiDung->ma_nguoi_dung
-        );
-
-        $request->session()->put(
-            'vai_tro',
-            $nguoiDung->vai_tro
-        );
-
+    // Không tìm thấy tài khoản hoặc sai mật khẩu
+    if (
+        !$nguoiDung ||
+        !Hash::check($validated['mat_khau'], $nguoiDung->mat_khau_hash)
+    ) {
         return response()->json([
-            'message' => 'Đăng nhập thành công',
-            'user' => [
-                'ma_nguoi_dung' => $nguoiDung->ma_nguoi_dung,
-                'ho_ten' => $nguoiDung->ho_ten,
-                'ten_dang_nhap' => $nguoiDung->ten_dang_nhap,
-                'thu_dien_tu_mo_phong' => $nguoiDung->thu_dien_tu_mo_phong,
-                'vai_tro' => $nguoiDung->vai_tro,
-                'trang_thai' => $nguoiDung->trang_thai,
-            ],
-         ]);
+            'message' => 'Sai tên đăng nhập hoặc mật khẩu'
+        ], 401);
     }
 
-    /**
-     * Đăng xuất
-     */
-    public function dangXuat(Request $request)
-    {
-        // Xóa toàn bộ dữ liệu session
-        $request->session()->invalidate();
-
-        // Tạo CSRF token mới cho session tiếp theo
-        $request->session()->regenerateToken();
-
+    // Kiểm tra tài khoản có đang bị khóa hay không
+    if ($nguoiDung->trang_thai !== 'kich_hoat') {
         return response()->json([
-            'message' => 'Đăng xuất thành công'
-        ]);
+            'message' => 'Tài khoản đã bị khóa'
+        ], 403);
     }
+
+    // Tạo session mới để tránh session fixation
+    $request->session()->regenerate();
+
+    // Lưu thông tin người dùng vào session
+    $request->session()->put(
+        'ma_nguoi_dung',
+        $nguoiDung->ma_nguoi_dung
+    );
+
+    $request->session()->put(
+        'vai_tro',
+        $nguoiDung->vai_tro
+    );
+
+    return response()->json([
+        'message' => 'Đăng nhập thành công',
+        'user' => [
+            'ma_nguoi_dung' => $nguoiDung->ma_nguoi_dung,
+            'ho_ten' => $nguoiDung->ho_ten,
+            'ten_dang_nhap' => $nguoiDung->ten_dang_nhap,
+            'thu_dien_tu_mo_phong' => $nguoiDung->thu_dien_tu_mo_phong,
+            'vai_tro' => $nguoiDung->vai_tro,
+            'trang_thai' => $nguoiDung->trang_thai,
+        ],
+    ]);
+}
+
+/**
+ * Đăng xuất
+ */
+public function dangXuat(Request $request)
+{
+    // Xóa toàn bộ dữ liệu session
+    $request->session()->invalidate();
+
+    // Tạo CSRF token mới cho session tiếp theo
+    $request->session()->regenerateToken();
+
+    return response()->json([
+        'message' => 'Đăng xuất thành công'
+    ]);
+}
+
+/**
+ * Lấy thông tin người dùng đang đăng nhập
+ */
+public function me(Request $request)
+{
+    if (!$request->session()->has('ma_nguoi_dung')) {
+        return response()->json([
+            'message' => 'Unauthenticated.'
+        ], 401);
+    }
+
+    $maNguoiDung = $request->session()->get('ma_nguoi_dung');
+
+    $user = DB::table('nguoi_dung')
+        ->where('ma_nguoi_dung', $maNguoiDung)
+        ->first();
+
+    if (!$user) {
+        return response()->json([
+            'message' => 'Unauthenticated.'
+        ], 401);
+    }
+
+    return response()->json([
+        'ma_nguoi_dung' => $user->ma_nguoi_dung,
+        'ho_ten' => $user->ho_ten,
+        'vai_tro' => $user->vai_tro,
+    ], 200);
+}
 }

@@ -17,6 +17,7 @@ Route::post('/v1/register', [AuthController::class, 'dangKy']);
 // Đăng nhập / đăng xuất: dùng Session
 Route::middleware('web')->group(function () {
     Route::post('/v1/login', [AuthController::class, 'dangNhap']);
+    Route::get('/v1/me', [AuthController::class, 'me']);
     Route::post('/v1/logout', [AuthController::class, 'dangXuat']);
 });
 Route::middleware(['web', 'role:quan_tri'])->get('/v1/admin/test', function () {
