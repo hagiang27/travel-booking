@@ -23,6 +23,25 @@
         </button>
 
         <button
+          v-if="coQuyenQuanTri"
+          type="button"
+          :class="{ active: route.path.startsWith('/quan-tri') }"
+          @click="router.push('/quan-tri/san-pham')"
+        >
+          Quản lý sản phẩm
+        </button>
+
+        <template v-if="user">
+          <span class="nguoi-dung" :title="user.ten_dang_nhap">
+            {{ user.ho_ten }}
+          </span>
+          <button type="button" @click="dangXuat">
+            Đăng xuất
+          </button>
+        </template>
+
+        <button
+          v-else
           type="button"
           :class="{ active: route.name === 'login' }"
           @click="router.push('/dang-nhap')"
@@ -52,16 +71,31 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { authService } from './lib/authService'
 
 const route = useRoute()
 const router = useRouter()
 const isDark = ref(false)
+const user = ref(null)
+
+const coQuyenQuanTri = computed(() =>
+  !!user.value && ['admin', 'supplier'].includes(user.value.vai_tro)
+)
+
+async function taiNguoiDung() {
+  user.value = await authService.layNguoiDungHienTai()
+}
+
+async function dangXuat() {
+  await authService.dangXuat()
+  user.value = null
+  router.push('/dang-nhap')
+}
 
 function toggleTheme() {
   isDark.value = !isDark.value
-
   document.documentElement.setAttribute(
     'data-theme',
     isDark.value ? 'dark' : 'light'
@@ -69,11 +103,11 @@ function toggleTheme() {
 }
 
 onMounted(() => {
-  document.documentElement.setAttribute(
-    'data-theme',
-    'light'
-  )
+  document.documentElement.setAttribute('data-theme', 'light')
+  taiNguoiDung()
 })
+
+watch(() => route.fullPath, taiNguoiDung)
 </script>
 
 <style scoped>
@@ -104,6 +138,7 @@ onMounted(() => {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .navigation button,
@@ -133,6 +168,12 @@ onMounted(() => {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-bg);
+}
+
+.nguoi-dung {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  padding: 0 var(--space-2);
 }
 
 .theme-button {
