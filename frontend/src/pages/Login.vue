@@ -48,8 +48,9 @@
         <button
           type="submit"
           class="login-button"
+          :disabled="dangGui"
         >
-          Đăng nhập
+          {{ dangGui ? 'Đang đăng nhập…' : 'Đăng nhập' }}
         </button>
       </form>
 
@@ -67,13 +68,37 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { authService } from '../lib/authService'
+
+const router = useRouter()
+const route = useRoute()
 
 const username = ref('')
 const password = ref('')
 const message = ref('')
+const dangGui = ref(false)
 
-function handleLogin() {
-  message.value = 'Đang chờ kết nối API đăng nhập của hệ thống.'
+// Chỉ cho phép chuyển hướng nội bộ (bắt đầu bằng "/", không phải "//")
+function layDuongDanSau() {
+  const dich = route.query.redirect
+  if (typeof dich === 'string' && dich.startsWith('/') && !dich.startsWith('//')) {
+    return dich
+  }
+  return '/'
+}
+
+async function handleLogin() {
+  message.value = ''
+  dangGui.value = true
+  try {
+    await authService.dangNhap(username.value.trim(), password.value)
+    router.push(layDuongDanSau())
+  } catch (err) {
+    message.value = err.message || 'Thông tin đăng nhập không đúng.'
+  } finally {
+    dangGui.value = false
+  }
 }
 </script>
 
@@ -175,6 +200,11 @@ function handleLogin() {
 
 .login-button:hover {
   background: var(--color-primary-hover);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .login-button:focus-visible {
