@@ -1,300 +1,507 @@
 <template>
   <div class="home-page">
+
+    <!-- BANNER -->
     <header class="home-header">
-      <div class="container">
-        <h1>Du lịch Việt Nam</h1>
-        <p>Khám phá những điểm đến hấp dẫn</p>
+      <img
+        src="/images/banner.webp"
+        alt="Du lịch Việt Nam"
+        class="banner-image"
+      />
+
+      <div class="banner-overlay">
+        <div class="banner-content">
+          <h1>Du lịch Việt Nam</h1>
+          <p>Khám phá những điểm đến hấp dẫn</p>
+        </div>
       </div>
     </header>
 
-    <main class="container">
-      <section class="search-section">
-        <h2>Tìm kiếm điểm đến</h2>
 
-        <div class="search-box">
-          <label for="destination-search" class="sr-only">
-            Tìm kiếm điểm đến
-          </label>
+    <!-- TÌM KIẾM -->
+    <section class="search-section">
+      <div class="search-box">
+        <input
+          v-model="searchKeyword"
+          type="text"
+          placeholder="Bạn muốn đi đâu?"
+          @keyup.enter="searchDestination"
+        />
 
-          <input
-            id="destination-search"
-            v-model="search"
-            type="text"
-            placeholder="Nhập tên điểm đến..."
-          />
+        <button @click="searchDestination">
+          Tìm kiếm
+        </button>
+      </div>
+    </section>
 
-          <button type="button">
-            Tìm kiếm
-          </button>
-        </div>
-      </section>
 
-      <section class="destination-section">
-        <div class="section-heading">
-          <h2>Điểm đến nổi bật</h2>
-          <span>{{ filteredDestinations.length }} điểm đến</span>
-        </div>
+    <!-- ĐIỂM ĐẾN NỔI BẬT -->
+    <section class="destinations-section">
 
-        <div v-if="filteredDestinations.length" class="destination-grid">
-          <article
-            v-for="destination in filteredDestinations"
-            :key="destination.ma_diem_den"
-            class="destination-card"
-          >
-            <div class="card-image">
-              Ảnh điểm đến
-            </div>
+      <div class="section-header">
+        <h2>Điểm đến nổi bật</h2>
+        <p>Khám phá những địa điểm du lịch hấp dẫn tại Việt Nam</p>
+      </div>
 
-            <div class="card-content">
-              <h3>{{ destination.ten_diem_den }}</h3>
 
-              <p class="province">
-                {{ destination.tinh_thanh }}
-              </p>
+      <div class="destination-grid">
 
-              <p class="price">
+        <div
+          v-for="destination in destinations"
+          :key="destination.ma_diem_den"
+          class="destination-card"
+        >
+
+          <!-- ẢNH -->
+          <div class="card-image">
+            <img
+              :src="destination.image"
+              :alt="destination.ten_diem_den"
+            />
+          </div>
+
+
+          <!-- THÔNG TIN -->
+          <div class="card-content">
+
+            <h3>
+              {{ destination.ten_diem_den }}
+            </h3>
+
+            <p class="location">
+              📍 {{ destination.tinh_thanh }}
+            </p>
+
+            <p class="ticket-price">
+              Giá tham quan:
+              <strong>
                 {{ formatPrice(destination.gia_ve_tham_quan) }}
-              </p>
-            </div>
-          </article>
+              </strong>
+            </p>
+
+            <button
+              class="detail-button"
+              @click="viewDestination(destination)"
+            >
+              Xem chi tiết
+            </button>
+
+          </div>
+
         </div>
 
-        <div v-else class="empty-state">
-          <h3>Không tìm thấy điểm đến</h3>
-          <p>Hãy thử nhập tên điểm đến hoặc tỉnh thành khác.</p>
-        </div>
-      </section>
-    </main>
+      </div>
+    </section>
+
   </div>
 </template>
 
-<script setup>
-import { computed, ref } from 'vue'
 
-const search = ref('')
+<script setup>
+import { ref } from 'vue'
+
+
+// ==================== TÌM KIẾM ====================
+
+const searchKeyword = ref('')
+
+
+const searchDestination = () => {
+
+  const keyword = searchKeyword.value.trim()
+
+  if (!keyword) {
+    alert('Vui lòng nhập điểm đến bạn muốn tìm kiếm!')
+    return
+  }
+
+  alert('Bạn đang tìm kiếm: ' + keyword)
+}
+
+
+// ==================== DANH SÁCH ĐIỂM ĐẾN ====================
 
 const destinations = ref([
   {
-    ma_diem_den: 1,
-    ten_diem_den: 'Tràng An',
-    tinh_thanh: 'Ninh Bình',
-    gia_ve_tham_quan: 250000
-  },
+  ma_diem_den: 1,
+  ten_diem_den: 'Tràng An',
+  tinh_thanh: 'Ninh Bình',
+  gia_ve_tham_quan: 250000,
+  image: '/images/trangan.jpg'
+},
+
   {
     ma_diem_den: 2,
     ten_diem_den: 'Vịnh Hạ Long',
     tinh_thanh: 'Quảng Ninh',
-    gia_ve_tham_quan: 290000
+    gia_ve_tham_quan: 290000,
+    image: '/images/ha-long.jpg'
   },
+
   {
     ma_diem_den: 3,
     ten_diem_den: 'Phố cổ Hội An',
     tinh_thanh: 'Quảng Nam',
-    gia_ve_tham_quan: 120000
+    gia_ve_tham_quan: 120000,
+    image: '/images/hoi-an.jpg'
   }
 ])
 
-const filteredDestinations = computed(() => {
-  const keyword = search.value.trim().toLowerCase()
 
-  if (!keyword) {
-    return destinations.value
-  }
+// ==================== FORMAT GIÁ ====================
 
-  return destinations.value.filter((destination) => {
-    return (
-      destination.ten_diem_den.toLowerCase().includes(keyword) ||
-      destination.tinh_thanh.toLowerCase().includes(keyword)
-    )
-  })
-})
-
-function formatPrice(price) {
+const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN').format(price) + ' VNĐ'
+}
+
+
+// ==================== XEM CHI TIẾT ====================
+
+const viewDestination = (destination) => {
+
+  alert(
+    'Bạn đã chọn điểm đến: ' +
+    destination.ten_diem_den
+  )
+
 }
 </script>
 
+
 <style scoped>
+
+/* ==================== TOÀN TRANG ==================== */
+
 .home-page {
+  width: 100%;
   min-height: 100vh;
-  background: var(--color-bg);
-  color: var(--color-text);
 }
 
-.container {
-  width: min(1200px, calc(100% - 32px));
-  margin: 0 auto;
-}
+
+/* ==================== BANNER ==================== */
 
 .home-header {
-  padding: var(--space-12) 0;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
 }
 
-.home-header h1 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
+.banner-image {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
 }
 
-.home-header p {
+.banner-overlay {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-content {
+  text-align: center;
+
+  color: white;
+
+  padding: 20px;
+}
+
+.banner-content h1 {
+  margin: 0 0 28px;
+
+  font-size: clamp(38px, 6vw, 68px);
+
+  font-weight: 700;
+
+  color: white;
+
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.banner-content p {
   margin: 0;
-  color: var(--color-text-secondary);
+
+  font-size: clamp(18px, 2.5vw, 28px);
+
+  color: white;
+
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.6);
 }
+
+
+/* ==================== SEARCH ==================== */
 
 .search-section {
-  padding: var(--space-8) 0;
-}
+  padding: 30px 20px;
 
-.search-section h2,
-.destination-section h2 {
-  margin: 0;
-  font-size: var(--font-size-h2);
+  background: var(--color-surface, #ffffff);
 }
 
 .search-box {
+  max-width: 850px;
+
+  margin: 0 auto;
+
   display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
+
+  gap: 12px;
 }
 
 .search-box input {
   flex: 1;
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--font-size-body);
+
+  height: 52px;
+
+  padding: 0 18px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 8px;
+
+  font-size: 16px;
+
+  outline: none;
 }
 
-.search-box input:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.search-box input:focus {
+  border-color: #42b883;
 }
 
 .search-box button {
-  padding: 0 var(--space-6);
+  height: 52px;
+
+  padding: 0 28px;
+
   border: none;
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: var(--color-bg);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
+
+  border-radius: 8px;
+
+  background: #42b883;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
   cursor: pointer;
+
+  transition: 0.2s;
 }
 
 .search-box button:hover {
-  background: var(--color-primary-hover);
+  background: #369f6e;
 }
 
-.search-box button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+
+/* ==================== ĐIỂM ĐẾN ==================== */
+
+.destinations-section {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 50px 20px 70px;
 }
 
-.destination-section {
-  padding-bottom: var(--space-12);
+.section-header {
+  text-align: center;
+
+  margin-bottom: 35px;
 }
 
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
+.section-header h2 {
+  margin: 0 0 10px;
+
+  font-size: 32px;
+
+  font-weight: 700;
 }
 
-.section-heading span {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
+.section-header p {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 16px;
 }
+
+
+/* ==================== GRID ==================== */
 
 .destination-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6);
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 25px;
 }
+
+
+/* ==================== CARD ==================== */
 
 .destination-card {
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
+
+.destination-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ==================== CARD IMAGE ==================== */
 
 .card-image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+
   aspect-ratio: 16 / 10;
-  background: var(--color-surface-2);
-  color: var(--color-text-muted);
+
+  overflow: hidden;
+
+  background: #f3f3f3;
 }
 
+.card-image img {
+  width: 100%;
+
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform 0.3s ease;
+}
+
+.destination-card:hover
+.card-image img {
+  transform: scale(1.05);
+}
+
+
+/* ==================== CARD CONTENT ==================== */
+
 .card-content {
-  padding: var(--space-4);
+  padding: 20px;
 }
 
 .card-content h3 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-h3);
+  margin: 0 0 10px;
+
+  font-size: 21px;
+
+  font-weight: 700;
 }
 
-.province {
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-secondary);
+.location {
+  margin: 0 0 12px;
+
+  color: #666;
+
+  font-size: 15px;
 }
 
-.price {
-  margin: 0;
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+.ticket-price {
+  margin: 0 0 18px;
+
+  color: #666;
+
+  font-size: 14px;
 }
 
-.empty-state {
-  padding: var(--space-12);
-  text-align: center;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+.ticket-price strong {
+  color: #42b883;
+
+  font-size: 16px;
 }
 
-.empty-state h3 {
-  margin: 0 0 var(--space-2);
+
+/* ==================== BUTTON ==================== */
+
+.detail-button {
+  width: 100%;
+
+  height: 42px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #42b883;
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
 }
 
-.empty-state p {
-  margin: 0;
-  color: var(--color-text-secondary);
+.detail-button:hover {
+  background: #369f6e;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
 
-@media (max-width: 768px) {
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 800px) {
+
+  .home-header {
+    height: 350px;
+  }
+
   .destination-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .search-box {
     flex-direction: column;
   }
+
+  .search-box button {
+    width: 100%;
+  }
+
 }
 
-@media (max-width: 480px) {
-  .destination-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

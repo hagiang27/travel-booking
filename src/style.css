@@ -294,3 +294,7 @@ code {
     border-right-color: var(--border);
   }
 }
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

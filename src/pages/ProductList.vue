@@ -9,7 +9,6 @@
       <section class="filter-section">
         <div class="filter-group">
           <label for="destination">Điểm đến</label>
-
           <select id="destination" v-model="selectedDestination">
             <option value="">Tất cả điểm đến</option>
             <option value="HN">Hà Nội</option>
@@ -20,7 +19,6 @@
 
         <div class="filter-group">
           <label for="type">Loại sản phẩm</label>
-
           <select id="type" v-model="selectedType">
             <option value="">Tất cả loại</option>
             <option value="tour">Tour</option>
@@ -31,7 +29,6 @@
 
         <div class="filter-group">
           <label for="price-from">Giá từ</label>
-
           <input
             id="price-from"
             v-model.number="priceFrom"
@@ -43,7 +40,6 @@
 
         <div class="filter-group">
           <label for="price-to">Giá đến</label>
-
           <input
             id="price-to"
             v-model.number="priceTo"
@@ -60,17 +56,17 @@
           <span>{{ filteredProducts.length }} sản phẩm</span>
         </div>
 
-        <div
-          v-if="filteredProducts.length"
-          class="product-grid"
-        >
+        <div v-if="filteredProducts.length" class="product-grid">
           <article
             v-for="product in filteredProducts"
             :key="product.ma_san_pham"
             class="product-card"
           >
             <div class="product-image">
-              Ảnh sản phẩm
+              <img
+                :src="product.image"
+                :alt="product.ten_san_pham"
+              />
             </div>
 
             <div class="product-content">
@@ -118,7 +114,8 @@ const products = ref([
     gia_co_ban: 1990000,
     diem_danh_gia_tb: 4.8,
     ma_diem_den: 'NB',
-    loai_san_pham: 'tour'
+    loai_san_pham: 'tour',
+    image: '/images/ninh-binh.webp'
   },
   {
     ma_san_pham: 'SP002',
@@ -126,7 +123,8 @@ const products = ref([
     gia_co_ban: 2490000,
     diem_danh_gia_tb: 4.7,
     ma_diem_den: 'QN',
-    loai_san_pham: 'tour'
+    loai_san_pham: 'tour',
+    image: '/images/366093-tour-kham-pha-vinh-ha-long-1-ngay.jpg'
   },
   {
     ma_san_pham: 'SP003',
@@ -134,7 +132,8 @@ const products = ref([
     gia_co_ban: 850000,
     diem_danh_gia_tb: 4.5,
     ma_diem_den: 'HN',
-    loai_san_pham: 'hotel'
+    loai_san_pham: 'hotel',
+    image: '/images/pullman-hanoi-night-facade.jpg'
   }
 ])
 
@@ -262,12 +261,17 @@ function formatPrice(price) {
 }
 
 .product-image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
   aspect-ratio: 16 / 10;
+  overflow: hidden;
   background: var(--color-surface-2);
-  color: var(--color-text-muted);
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .product-content {

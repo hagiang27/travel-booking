@@ -8,10 +8,7 @@
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="username">
-            Tên đăng nhập
-          </label>
-
+          <label for="username">Tên đăng nhập</label>
           <input
             id="username"
             v-model="username"
@@ -23,10 +20,7 @@
         </div>
 
         <div class="form-group">
-          <label for="password">
-            Mật khẩu
-          </label>
-
+          <label for="password">Mật khẩu</label>
           <input
             id="password"
             v-model="password"
@@ -39,26 +33,21 @@
 
         <div
           v-if="message"
-          class="login-message"
-          role="status"
+          class="login-message login-message--error"
+          role="alert"
         >
           {{ message }}
         </div>
 
-        <button
-          type="submit"
-          class="login-button"
-        >
-          Đăng nhập
+        <button type="submit" class="login-button" :disabled="isLoading">
+          {{ isLoading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
         </button>
       </form>
 
       <div class="login-footer">
         <p>
           Chưa có tài khoản?
-          <button type="button" class="register-link">
-            Đăng ký
-          </button>
+          <button type="button" class="register-link">Đăng ký</button>
         </p>
       </div>
     </div>
@@ -67,13 +56,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import { signIn } from '../services/auth'
+
+const emit = defineEmits(['success'])
 
 const username = ref('')
 const password = ref('')
 const message = ref('')
+const isLoading = ref(false)
 
-function handleLogin() {
-  message.value = 'Đang chờ kết nối API đăng nhập của hệ thống.'
+async function handleLogin() {
+  message.value = ''
+  isLoading.value = true
+
+  try {
+    const user = await signIn(username.value.trim(), password.value)
+    password.value = ''
+    emit('success', user) // App.vue sẽ chuyển trang
+  } catch (error) {
+    message.value = error.message || 'Đăng nhập thất bại.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -161,6 +165,11 @@ function handleLogin() {
   line-height: 1.5;
 }
 
+.login-message--error {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
 .login-button {
   width: 100%;
   min-height: 44px;
@@ -171,6 +180,11 @@ function handleLogin() {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .login-button:hover {
