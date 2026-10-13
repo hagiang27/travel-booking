@@ -2,9 +2,27 @@
 import { MOCK_PRODUCTS } from '../mock/mockProducts'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+const KHOA_LUU = 'mock-san-pham'
 
-// Bản mock: dữ liệu nằm trong bộ nhớ, tải lại trang thì về ban đầu
-let dsMock = [...MOCK_PRODUCTS]
+// Đọc dữ liệu đã lưu; nếu chưa có thì dùng dữ liệu mẫu ban đầu
+function docDuLieu() {
+  try {
+    const raw = localStorage.getItem(KHOA_LUU)
+    return raw ? JSON.parse(raw) : [...MOCK_PRODUCTS]
+  } catch {
+    return [...MOCK_PRODUCTS]
+  }
+}
+
+function ghiDuLieu(ds) {
+  try {
+    localStorage.setItem(KHOA_LUU, JSON.stringify(ds))
+  } catch {
+    // Bộ nhớ đầy hoặc bị chặn: dữ liệu vẫn dùng được trong phiên này
+  }
+}
+
+let dsMock = docDuLieu()
 
 const mock = {
   async danhSach() {
@@ -13,14 +31,17 @@ const mock = {
   async tao(sp) {
     const so = String(dsMock.length + 1).padStart(4, '0')
     const moi = { ...sp, ma_san_pham: `SP${so}`, diem_danh_gia_tb: 0 }
-    dsMock.push(moi)
+    dsMock = [...dsMock, moi]
+    ghiDuLieu(dsMock)
     return moi
   },
   async capNhat(ma, sp) {
     dsMock = dsMock.map((x) => (x.ma_san_pham === ma ? { ...x, ...sp } : x))
+    ghiDuLieu(dsMock)
   },
   async xoa(ma) {
     dsMock = dsMock.filter((x) => x.ma_san_pham !== ma)
+    ghiDuLieu(dsMock)
   },
 }
 
