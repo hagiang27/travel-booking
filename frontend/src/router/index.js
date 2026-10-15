@@ -1,38 +1,66 @@
-// frontend/src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { authService } from '../lib/authService'
 
 const routes = [
-  { path: '/', name: 'home', component: () => import('../pages/Home.vue') },
-  { path: '/dang-nhap', name: 'login', component: () => import('../pages/Login.vue') },
-  { path: '/san-pham', name: 'list', component: () => import('../pages/ProductList.vue') },
-  { path: '/san-pham/:slug', name: 'detail', component: () => import('../pages/ProductDetail.vue'), props: true },
-  { path: '/dat-cho/:code', name: 'booking', component: () => import('../views/BookingView.vue'), props: true, meta: { requiresAuth: true } },
-
-  // Trang quản trị: chỉ admin và nhà cung cấp.
-  // Tạm dùng ProductList để kiểm tra guard. Khi có AdminProducts.vue thì đổi component.
+  {
+    path: '/',
+    name: 'home',
+    component: () => import('../views/HomeView.vue'),
+  },
+  {
+    path: '/dang-nhap',
+    name: 'login',
+    component: () => import('../pages/Login.vue'),
+  },
+  {
+    path: '/san-pham',
+    name: 'list',
+    component: () => import('../pages/ProductList.vue'),
+  },
+  {
+    path: '/san-pham/:slug',
+    name: 'detail',
+    component: () => import('../pages/ProductDetail.vue'),
+    props: false,
+  },
+  {
+    path: '/so-sanh/:slug',
+    name: 'compare',
+    component: () => import('../pages/CompareView.vue'),
+  },
+  {
+    path: '/dat-cho/:code',
+    name: 'booking',
+    component: () => import('../views/BookingView.vue'),
+    props: true,
+    meta: { requiresAuth: true },
+  },
   {
     path: '/quan-tri/san-pham',
     name: 'admin-products',
     component: () => import('../pages/AdminProducts.vue'),
-    meta: { roles: ['quan_tri', 'nha_cung_cap'] },
+    meta: { requiresAuth: true, roles: ['quan_tri', 'nha_cung_cap'] },
   },
-
-  { path: '/khong-du-quyen', name: 'forbidden', component: () => import('../views/ForbiddenView.vue') },
-  { path: '/:pathMatch(.*)*', name: '404', component: () => import('../views/NotFound.vue') },
+  {
+    path: '/khong-co-quyen',
+    name: 'forbidden',
+    component: () => import('../views/ForbiddenView.vue'),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('../views/NotFound.vue'),
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior: () => ({ top: 0 }),
 })
 
-// Chặn truy cập theo vai trò ở phía giao diện.
-// Máy chủ vẫn phải kiểm tra lại khi nhận yêu cầu (V3 phụ trách).
 router.beforeEach(async (to) => {
-  const canKiemTra = to.meta.roles || to.meta.requiresAuth
-  if (!canKiemTra) return true
+  const cанCheck = to.meta.requiresAuth || to.meta.roles
+  if (!cанCheck) return true
 
   const nguoiDung = await authService.layNguoiDungHienTai()
 
