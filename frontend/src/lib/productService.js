@@ -3,7 +3,7 @@ import { MOCK_LICH } from '../mock/mockSchedules'
 
 // Đọc từ .env: VITE_USE_MOCK=true|false. Chưa khai báo thì dùng mock.
 // Giá trị này phải khớp với authService.js.
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 const KHOA_LUU = 'mock-san-pham'
 const SO_MOI_TRANG_MAC_DINH = 12
