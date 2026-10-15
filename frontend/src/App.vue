@@ -64,16 +64,20 @@
       </button>
     </header>
 
-    <main>
+        <main>
       <router-view />
     </main>
+
+    <AppFooter />
   </div>
+  
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authService } from './lib/authService'
+import AppFooter from './components/AppFooter.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -113,6 +117,8 @@ watch(() => route.fullPath, taiNguoiDung)
 <style scoped>
 .app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
