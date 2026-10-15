@@ -15,6 +15,8 @@ const maQr = ref('')
 const daThanhToan = ref(false)
 let bo_dem = null
 
+// Đơn từ trang so sánh có nhà cung cấp (chao).
+// Đơn từ trang chi tiết không có chao, nên dùng giá gốc của sản phẩm.
 const chiTiet = computed(() => {
   if (!don.value) return null
   const chao = don.value.chao || {
@@ -78,7 +80,7 @@ onUnmounted(() => {
     <!-- Không tìm thấy đơn -->
     <section v-if="!don" class="khoi">
       <h1>Không tìm thấy đơn {{ code }}</h1>
-      <p>
+      <p class="can-giua">
         Đơn có thể đã hết hạn, hoặc được tạo trên một trình duyệt khác.
         Hãy giữ chỗ lại từ trang sản phẩm.
       </p>
@@ -86,7 +88,7 @@ onUnmounted(() => {
 
     <template v-else>
       <!-- Tiêu đề và tóm tắt đơn -->
-      <section class="khoi">
+      <section class="khoi can-giua">
         <p class="nhan-demo">Thông tin thanh toán mô phỏng, không có giao dịch thật</p>
         <h1>Thanh toán đơn {{ don.ma_don }}</h1>
         <p class="tom-tat">
@@ -135,7 +137,7 @@ onUnmounted(() => {
             </tr>
           </tbody>
         </table>
-        <p class="ghi-chu">
+        <p class="ghi-chu can-giua">
           Phụ phí và thuế trong bản demo là giả định để minh họa.
         </p>
       </section>
@@ -190,7 +192,30 @@ onUnmounted(() => {
   color: var(--color-text, #1f2937);
 }
 
+.trang-thanh-toan h1 {
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.trang-thanh-toan h2 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.trang-thanh-toan h3 {
+  font-size: 1rem;
+  line-height: 1.3;
+  margin: 12px 0 6px;
+  text-align: center;
+}
+
 .quay-lai {
+  display: block;
+  text-align: center;
   color: var(--color-primary, #2563eb);
   text-decoration: none;
   font-size: 0.92rem;
@@ -204,16 +229,22 @@ onUnmounted(() => {
   margin-top: 16px;
 }
 
+.can-giua {
+  text-align: center;
+}
+
 .nhan-demo {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #b45309;
+  text-align: center;
   margin: 0 0 8px;
 }
 
 .tom-tat {
   margin: 4px 0;
+  text-align: center;
 }
 
 .thong-bao {
@@ -221,6 +252,7 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: 8px;
   background: #eff6ff;
+  text-align: center;
 }
 
 .thong-bao.thanh-cong {
@@ -241,6 +273,7 @@ onUnmounted(() => {
 .bang-gia td {
   padding: 8px 4px;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
+  text-align: left;
 }
 
 .bang-gia .so-tien {
@@ -264,11 +297,17 @@ onUnmounted(() => {
   gap: 16px;
 }
 
+.hai-cot h3,
+.hai-cot ul {
+  text-align: left;
+}
+
 .thanh-toan {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   align-items: center;
+  justify-content: center;
 }
 
 .ma-qr {
@@ -284,7 +323,8 @@ onUnmounted(() => {
 }
 
 .nut-chinh {
-  margin-top: 16px;
+  display: block;
+  margin: 16px auto 0;
   background: var(--color-primary, #2563eb);
   color: #fff;
   border: none;
@@ -296,5 +336,11 @@ onUnmounted(() => {
 
 .nut-chinh:hover {
   opacity: 0.92;
+}
+
+@media (max-width: 480px) {
+  .trang-thanh-toan h1 {
+    font-size: 1.35rem;
+  }
 }
 </style>
