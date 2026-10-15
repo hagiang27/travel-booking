@@ -1,38 +1,61 @@
-// frontend/src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { authService } from '../lib/authService'
 
 const routes = [
-  { path: '/', name: 'home', component: () => import('../pages/Home.vue') },
-  { path: '/dang-nhap', name: 'login', component: () => import('../pages/Login.vue') },
-  { path: '/san-pham', name: 'list', component: () => import('../pages/ProductList.vue') },
-  { path: '/san-pham/:slug', name: 'detail', component: () => import('../pages/ProductDetail.vue'), props: true },
-  { path: '/dat-cho/:code', name: 'booking', component: () => import('../views/BookingView.vue'), props: true, meta: { requiresAuth: true } },
-
-  // Trang quản trị: chỉ admin và nhà cung cấp.
-  // Tạm dùng ProductList để kiểm tra guard. Khi có AdminProducts.vue thì đổi component.
+  {
+    path: '/',
+    name: 'home',
+    component: () => import('../views/HomeView.vue'),
+  },
+  {
+    path: '/dang-nhap',
+    name: 'login',
+    component: () => import('../pages/Login.vue'),
+  },
+  {
+    path: '/san-pham',
+    name: 'list',
+    component: () => import('../pages/ProductList.vue'),
+  },
+  {
+    path: '/san-pham/:slug',
+    name: 'detail',
+    component: () => import('../pages/ProductDetail.vue'),
+  },
+  {
+    path: '/so-sanh/:slug',
+    name: 'compare',
+    component: () => import('../pages/CompareView.vue'),
+  },
   {
     path: '/quan-tri/san-pham',
     name: 'admin-products',
     component: () => import('../pages/AdminProducts.vue'),
     meta: { roles: ['quan_tri', 'nha_cung_cap'] },
   },
-
-  { path: '/khong-du-quyen', name: 'forbidden', component: () => import('../views/ForbiddenView.vue') },
-  { path: '/:pathMatch(.*)*', name: '404', component: () => import('../views/NotFound.vue') },
+  {
+    path: '/khong-du-quyen',
+    name: 'forbidden',
+    component: () => import('../views/ForbiddenView.vue'),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('../views/NotFound.vue'),
+  },
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior: () => ({ top: 0 }),
 })
 
-// Chặn truy cập theo vai trò ở phía giao diện.
-// Máy chủ vẫn phải kiểm tra lại khi nhận yêu cầu (V3 phụ trách).
+// Kiểm tra đăng nhập và quyền trước khi vào trang
 router.beforeEach(async (to) => {
-  const canKiemTra = to.meta.roles || to.meta.requiresAuth
-  if (!canKiemTra) return true
+  const cacVaiTro = to.meta.roles
+  const cancDangNhap = to.meta.requiresAuth
+
+  if (!cacVaiTro && !cancDangNhap) return true
 
   const nguoiDung = await authService.layNguoiDungHienTai()
 
@@ -40,7 +63,7 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.meta.roles && !to.meta.roles.includes(nguoiDung.vai_tro)) {
+  if (cacVaiTro && !cacVaiTro.includes(nguoiDung.vai_tro)) {
     return { name: 'forbidden' }
   }
 
