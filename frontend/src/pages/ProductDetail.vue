@@ -114,6 +114,12 @@
             <h3>Đã giữ chỗ. Mã đơn: {{ donTam.ma_don }}</h3>
             <p>Thời gian còn lại để thanh toán: <strong>{{ phutConLai }}</strong></p>
             <p>Tổng tạm tính: {{ formatPrice(donTam.tong_tien) }}</p>
+            <RouterLink
+              :to="{ name: 'booking', params: { code: donTam.ma_don } }"
+              class="booking-button link-button"
+            >
+              Tới trang thanh toán
+            </RouterLink>
           </div>
         </section>
       </template>
@@ -127,6 +133,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { productService } from '../lib/productService'
 import { authService } from '../lib/authService'
 import { MO_TA } from '../mock/mockDescriptions'
+import { luuDonMock } from '../lib/donMock'
 
 const route = useRoute()
 const router = useRouter()
@@ -236,6 +243,17 @@ async function giuCho() {
     })
 
     donTam.value = don
+        const lichChon = lichKhaDung.value.find((l) => l.ma_lich === maLichChon.value)
+    luuDonMock({
+      ...don,
+      ma_san_pham: sp.value.ma_san_pham,
+      ten_san_pham: sp.value.ten_san_pham,
+      ten_nha_cung_cap: 'Giá niêm yết',
+      ngay_khoi_hanh: lichChon?.ngay_khoi_hanh || '',
+      so_nguoi: soNguoiHopLe.value,
+      gia_co_ban: sp.value.gia_co_ban,
+      chao: null,
+    })
     batDemNguoc(don.het_han)
 
     // Tải lại lịch để cập nhật số chỗ còn lại
@@ -542,5 +560,12 @@ onUnmounted(dungDemNguoc)
   .product-info h1 {
     font-size: var(--font-size-h2);
   }
+}
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-3);
+  text-decoration: none;
 }
 </style>

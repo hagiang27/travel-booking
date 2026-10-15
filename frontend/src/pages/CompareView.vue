@@ -76,8 +76,18 @@
             <p><strong>Chính sách hủy:</strong> {{ ket.chao.chinh_sach_huy }}</p>
             <p><strong>Bao gồm:</strong> {{ (ket.chao.bao_gom || []).join(', ') || 'Đang cập nhật' }}</p>
             <p><strong>Không bao gồm:</strong> {{ (ket.chao.khong_bao_gom || []).join(', ') || 'Đang cập nhật' }}</p>
+            <button
+              type="button"
+              class="book-button"
+              :disabled="dangDat"
+              @click="datVoiChao(ket)"
+            >
+              {{ dangDat ? 'Đang giữ chỗ...' : 'Đặt với nhà cung cấp này' }}
+            </button>
           </li>
         </ul>
+
+        <p v-if="thongBao" class="message">{{ thongBao }}</p>
 
         <p class="note">
           Phụ phí và thuế trong trang này là số liệu giả định để minh họa, không phải giá thật.
@@ -89,12 +99,17 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { authService } from '../lib/authService'
+import { luuDonMock } from '../lib/donMock'
 import { productService } from '../lib/productService'
 import { MOCK_CHAO_GIA } from '../mock/mockOffers'
 import { laCuoiTuan, soSanhGia } from '../lib/gia'
 
 const route = useRoute()
+const router = useRouter()
+const dangDat = ref(false)
+const thongBao = ref('')
 
 // Router có thể đặt tên tham số là slug hoặc ma, đọc cả hai để tránh lỗi
 const maSanPham = computed(() => route.params.slug || route.params.ma)
@@ -131,6 +146,49 @@ async function taiSanPham() {
 }
 
 watch(maSanPham, taiSanPham, { immediate: true })
+async function datVoiChao(ket) {
+  thongBao.value = ''
+
+  const nguoiDung = await authService.layNguoiDungHienTai()
+  if (!nguoiDung) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  const lichChon = lich.value.find((l) => l.ngay_khoi_hanh === ngayChon.value)
+  if (!lichChon) {
+    thongBao.value = 'Vui lòng chọn ngày khởi hành.'
+    return
+  }
+
+  const soNguoiHopLe = Math.min(30, Math.max(1, Number(soNguoi.value) || 1))
+
+  dangDat.value = true
+  try {
+    const don = await productService.giuCho({
+      ma_san_pham: sp.value.ma_san_pham,
+      ma_lich: lichChon.ma_lich,
+      so_nguoi: soNguoiHopLe,
+    })
+
+    luuDonMock({
+      ...don,
+      ma_san_pham: sp.value.ma_san_pham,
+      ten_san_pham: sp.value.ten_san_pham,
+      ten_nha_cung_cap: ket.chao.ten_ncc,
+      ngay_khoi_hanh: ngayChon.value,
+      so_nguoi: soNguoiHopLe,
+      chao: ket.chao,
+    })
+
+    router.push({ name: 'booking', params: { code: don.ma_don } })
+  } catch (e) {
+    thongBao.value =
+      e.kiemTra?.so_nguoi?.[0] || e.message || 'Không giữ được chỗ, vui lòng thử lại.'
+  } finally {
+    dangDat.value = false
+  }
+}
 
 function formatNgay(ngay) {
   if (!ngay || !ngay.includes('-')) return ngay
@@ -305,5 +363,26 @@ function formatPrice(price) {
   .filter-box {
     grid-template-columns: 1fr;
   }
+}
+.book-button {
+  margin-top: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-bg);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.book-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.message {
+  color: var(--color-warning);
+  font-size: var(--font-size-small);
 }
 </style>
