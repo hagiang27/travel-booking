@@ -2,128 +2,250 @@
   <div class="detail-page">
     <main class="container">
       <section class="back-section">
-        <button
-          type="button"
-          class="back-button"
-          aria-label="Quay lại danh sách sản phẩm"
-        >
-          ← Quay lại danh sách
-        </button>
+        <RouterLink to="/san-pham" class="back-button">← Quay lại danh sách</RouterLink>
       </section>
 
-      <section class="product-detail">
-        <div class="product-image">
-          Ảnh sản phẩm
-        </div>
+      <div v-if="dangTai" class="empty-state">
+        <p>Đang tải sản phẩm...</p>
+      </div>
 
-        <div class="product-info">
-          <p class="product-code">
-            Mã sản phẩm: {{ product.ma_san_pham }}
-          </p>
+      <div v-else-if="loi" class="empty-state">
+        <h3>Không tải được sản phẩm</h3>
+        <p>{{ loi }}</p>
+      </div>
 
-          <h1>{{ product.ten_san_pham }}</h1>
+      <template v-else-if="sp">
+        <section class="product-detail">
+          <div class="product-image">Ảnh sản phẩm</div>
 
-          <p class="product-price">
-            {{ formatPrice(product.gia_co_ban) }}
-          </p>
+          <div class="product-info">
+            <p class="product-code">Mã sản phẩm: {{ sp.ma_san_pham }}</p>
+            <h1>{{ sp.ten_san_pham }}</h1>
+            <p class="product-price">{{ formatPrice(sp.gia_co_ban) }} / khách</p>
 
-          <div class="policy-box">
-            <h2>Chính sách hủy</h2>
+            <div class="policy-box">
+              <h2>Chính sách hủy</h2>
+              <p>{{ sp.chinh_sach_huy || 'Đang cập nhật.' }}</p>
+            </div>
+          </div>
+        </section>
 
-            <p>
-              {{ product.chinh_sach_huy }}
-            </p>
+        <section class="schedule-section">
+          <div class="section-heading">
+            <h2>Lịch khởi hành còn chỗ</h2>
           </div>
 
-          <button type="button" class="booking-button">
-            Chọn lịch khởi hành
-          </button>
-        </div>
-      </section>
+          <div v-if="lichKhaDung.length" class="schedule-list">
+            <div
+              v-for="lich in lichKhaDung"
+              :key="lich.ma_lich"
+              class="schedule-item"
+              :class="{ 'is-selected': lich.ma_lich === maLichChon }"
+            >
+              <div>
+                <span class="schedule-label">Ngày khởi hành</span>
+                <strong>{{ formatNgay(lich.ngay_khoi_hanh) }}</strong>
+              </div>
 
-      <section class="schedule-section">
-        <div class="section-heading">
-          <h2>Lịch khởi hành còn chỗ</h2>
-        </div>
+              <div>
+                <span class="schedule-label">Còn lại</span>
+                <strong>{{ lich.con_lai }} chỗ</strong>
+              </div>
 
-        <div
-          v-if="schedules.length"
-          class="schedule-list"
-        >
-          <div
-            v-for="schedule in schedules"
-            :key="schedule.ma_lich"
-            class="schedule-item"
-          >
-            <div>
-              <span class="schedule-label">
-                Ngày khởi hành
-              </span>
+              <button
+                type="button"
+                class="select-button"
+                :disabled="lich.con_lai <= 0 || !!donTam"
+                @click="maLichChon = lich.ma_lich"
+              >
+                {{ lich.ma_lich === maLichChon ? 'Đã chọn' : 'Chọn' }}
+              </button>
+            </div>
+          </div>
 
-              <strong>
-                {{ schedule.ngay_khoi_hanh }}
-              </strong>
+          <div v-else class="empty-state">
+            <h3>Chưa có lịch khởi hành</h3>
+            <p>Vui lòng quay lại sau.</p>
+          </div>
+        </section>
+
+        <section class="booking-section">
+          <div class="section-heading">
+            <h2>Giữ chỗ</h2>
+          </div>
+
+          <div class="booking-form">
+            <div class="form-group">
+              <label for="so-nguoi">Số người (1 đến 30)</label>
+              <input
+                id="so-nguoi"
+                v-model.number="soNguoi"
+                type="number"
+                min="1"
+                max="30"
+                :disabled="!!donTam"
+              />
             </div>
 
-            <div>
-              <span class="schedule-label">
-                Còn lại
-              </span>
+            <p class="tam-tinh">Tạm tính: {{ formatPrice(tamTinh) }}</p>
 
-              <strong>
-                {{ schedule.con_lai }} chỗ
-              </strong>
-            </div>
-
-            <button type="button" class="select-button">
-              Chọn
+            <button
+              type="button"
+              class="booking-button"
+              :disabled="!maLichChon || !!donTam || dangGiuCho"
+              @click="giuCho"
+            >
+              {{ dangGiuCho ? 'Đang giữ chỗ...' : 'Giữ chỗ 15 phút' }}
             </button>
-          </div>
-        </div>
 
-        <div
-          v-else
-          class="empty-state"
-        >
-          <h3>Chưa có lịch khởi hành</h3>
-          <p>Vui lòng quay lại sau.</p>
-        </div>
-      </section>
+            <p v-if="thongBao" class="message" role="status">{{ thongBao }}</p>
+          </div>
+
+          <div v-if="donTam" class="hold-box" role="status">
+            <h3>Đã giữ chỗ. Mã đơn: {{ donTam.ma_don }}</h3>
+            <p>Thời gian còn lại để thanh toán: <strong>{{ phutConLai }}</strong></p>
+            <p>Tổng tạm tính: {{ formatPrice(donTam.tong_tien) }}</p>
+          </div>
+        </section>
+      </template>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { productService } from '../lib/productService'
+import { authService } from '../lib/authService'
 
-const product = ref({
-  ma_san_pham: 'SP001',
-  ten_san_pham: 'Tour Hà Nội - Ninh Bình 2 ngày 1 đêm',
-  gia_co_ban: 1990000,
-  chinh_sach_huy: 'Có thể hủy theo điều kiện của sản phẩm.'
+const route = useRoute()
+const router = useRouter()
+
+// Router có thể đặt tên tham số là slug hoặc ma, đọc cả hai để tránh lỗi
+const maSanPham = computed(() => route.params.slug || route.params.ma)
+
+const sp = ref(null)
+const lichKhaDung = ref([])
+const dangTai = ref(false)
+const loi = ref('')
+
+const maLichChon = ref('')
+const soNguoi = ref(1)
+const dangGiuCho = ref(false)
+const thongBao = ref('')
+const donTam = ref(null)
+const giayConLai = ref(0)
+
+let boDem = null
+
+const soNguoiHopLe = computed(() => Math.min(30, Math.max(1, Number(soNguoi.value) || 1)))
+
+const tamTinh = computed(() =>
+  sp.value ? Number(sp.value.gia_co_ban) * soNguoiHopLe.value : 0
+)
+
+const phutConLai = computed(() => {
+  const phut = Math.floor(giayConLai.value / 60)
+  const giay = String(giayConLai.value % 60).padStart(2, '0')
+  return `${phut}:${giay}`
 })
 
-const schedules = ref([
-  {
-    ma_lich: 'L001',
-    ngay_khoi_hanh: '25/09/2026',
-    con_lai: 8
-  },
-  {
-    ma_lich: 'L002',
-    ngay_khoi_hanh: '02/10/2026',
-    con_lai: 5
-  },
-  {
-    ma_lich: 'L003',
-    ngay_khoi_hanh: '09/10/2026',
-    con_lai: 12
+async function taiChiTiet() {
+  dangTai.value = true
+  loi.value = ''
+
+  try {
+    const data = await productService.chiTiet(maSanPham.value)
+    sp.value = data
+    lichKhaDung.value = data.lich_kha_dung || []
+  } catch (e) {
+    sp.value = null
+    lichKhaDung.value = []
+    loi.value = e.status === 404 ? 'Sản phẩm không tồn tại.' : e.message
+  } finally {
+    dangTai.value = false
   }
-])
+}
+
+watch(
+  maSanPham,
+  () => {
+    maLichChon.value = ''
+    donTam.value = null
+    thongBao.value = ''
+    dungDemNguoc()
+    taiChiTiet()
+  },
+  { immediate: true }
+)
+
+function batDemNguoc(hetHan) {
+  dungDemNguoc()
+
+  const tinh = () => {
+    giayConLai.value = Math.max(0, Math.floor((new Date(hetHan) - Date.now()) / 1000))
+
+    if (giayConLai.value <= 0) {
+      dungDemNguoc()
+      donTam.value = null
+      thongBao.value = 'Đã hết thời gian giữ chỗ. Vui lòng giữ lại.'
+    }
+  }
+
+  tinh()
+  boDem = setInterval(tinh, 1000)
+}
+
+function dungDemNguoc() {
+  if (boDem) {
+    clearInterval(boDem)
+    boDem = null
+  }
+}
+
+async function giuCho() {
+  thongBao.value = ''
+
+  const nguoiDung = await authService.layNguoiDungHienTai()
+  if (!nguoiDung) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  dangGiuCho.value = true
+
+  try {
+    const don = await productService.giuCho({
+      ma_san_pham: sp.value.ma_san_pham,
+      ma_lich: maLichChon.value,
+      so_nguoi: soNguoiHopLe.value,
+    })
+
+    donTam.value = don
+    batDemNguoc(don.het_han)
+
+    // Tải lại lịch để cập nhật số chỗ còn lại
+    const data = await productService.chiTiet(maSanPham.value)
+    lichKhaDung.value = data.lich_kha_dung || []
+  } catch (e) {
+        thongBao.value =
+      e.kiemTra?.so_nguoi?.[0] || e.message || 'Không giữ được chỗ, vui lòng thử lại.'
+  } finally {
+    dangGiuCho.value = false
+  }
+}
+
+function formatNgay(ngay) {
+  if (!ngay || !ngay.includes('-')) return ngay
+  const [nam, thang, ngayTrongThang] = ngay.split('-')
+  return `${ngayTrongThang}/${thang}/${nam}`
+}
 
 function formatPrice(price) {
   return new Intl.NumberFormat('vi-VN').format(price) + ' VNĐ'
 }
+
+onUnmounted(dungDemNguoc)
 </script>
 
 <style scoped>
@@ -144,12 +266,9 @@ function formatPrice(price) {
 }
 
 .back-button {
-  padding: 0;
-  border: none;
-  background: none;
   color: var(--color-primary);
   font-size: var(--font-size-body);
-  cursor: pointer;
+  text-decoration: none;
 }
 
 .product-detail {
@@ -211,27 +330,6 @@ function formatPrice(price) {
   line-height: 1.6;
 }
 
-.booking-button {
-  min-height: 44px;
-  padding: 0 var(--space-6);
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: var(--color-bg);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.booking-button:hover {
-  background: var(--color-primary-hover);
-}
-
-.schedule-section {
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
-}
-
 .section-heading {
   margin-bottom: var(--space-4);
 }
@@ -239,6 +337,11 @@ function formatPrice(price) {
 .section-heading h2 {
   margin: 0;
   font-size: var(--font-size-h2);
+}
+
+.schedule-section {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
 }
 
 .schedule-list {
@@ -256,6 +359,10 @@ function formatPrice(price) {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
+}
+
+.schedule-item.is-selected {
+  border-color: var(--color-primary);
 }
 
 .schedule-item > div {
@@ -281,9 +388,86 @@ function formatPrice(price) {
   cursor: pointer;
 }
 
-.select-button:hover {
+.select-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.booking-section {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 420px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-group label {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+}
+
+.form-group input {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.tam-tinh {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.booking-button {
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
   color: var(--color-bg);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.booking-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.message {
+  margin: 0;
+  color: var(--color-warning);
+  font-size: var(--font-size-small);
+}
+
+.hold-box {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.hold-box h3 {
+  margin: 0 0 var(--space-2);
+}
+
+.hold-box p {
+  margin: 0 0 var(--space-1);
 }
 
 .empty-state {
