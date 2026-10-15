@@ -14,8 +14,8 @@ const routes = [
   {
     path: '/quan-tri/san-pham',
     name: 'admin-products',
-    component: () => import('../pages/ProductList.vue'),
-    meta: { roles: ['admin', 'supplier'] },
+    component: () => import('../pages/AdminProducts.vue'),
+    meta: { roles: ['quan_tri', 'nha_cung_cap'] },
   },
 
   { path: '/khong-du-quyen', name: 'forbidden', component: () => import('../views/ForbiddenView.vue') },

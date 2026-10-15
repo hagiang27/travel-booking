@@ -81,7 +81,7 @@ const isDark = ref(false)
 const user = ref(null)
 
 const coQuyenQuanTri = computed(() =>
-  !!user.value && ['admin', 'supplier'].includes(user.value.vai_tro)
+  !!user.value && ['quan_tri', 'nha_cung_cap'].includes(user.value.vai_tro)
 )
 
 async function taiNguoiDung() {
