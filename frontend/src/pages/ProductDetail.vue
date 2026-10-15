@@ -27,6 +27,10 @@
               <h2>Chính sách hủy</h2>
               <p>{{ sp.chinh_sach_huy || 'Đang cập nhật.' }}</p>
             </div>
+
+            <RouterLink :to="`/so-sanh/${sp.ma_san_pham}`" class="compare-link">
+              So sánh nhà cung cấp →
+            </RouterLink>
           </div>
         </section>
 
@@ -323,7 +327,7 @@ onUnmounted(dungDemNguoc)
 
 .policy-box {
   padding: var(--space-4);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -338,6 +342,14 @@ onUnmounted(dungDemNguoc)
   margin: 0;
   color: var(--color-text-secondary);
   line-height: 1.6;
+}
+
+.compare-link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
 }
 
 .description-section {
