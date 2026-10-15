@@ -30,6 +30,11 @@
           </div>
         </section>
 
+        <section class="description-section">
+          <h2>Mô tả</h2>
+          <p>{{ moTa }}</p>
+        </section>
+
         <section class="schedule-section">
           <div class="section-heading">
             <h2>Lịch khởi hành còn chỗ</h2>
@@ -117,6 +122,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { productService } from '../lib/productService'
 import { authService } from '../lib/authService'
+import { MO_TA } from '../mock/mockDescriptions'
 
 const route = useRoute()
 const router = useRouter()
@@ -128,6 +134,10 @@ const sp = ref(null)
 const lichKhaDung = ref([])
 const dangTai = ref(false)
 const loi = ref('')
+
+const moTa = computed(
+  () => MO_TA[sp.value?.ma_san_pham] || 'Đang cập nhật mô tả cho sản phẩm này.'
+)
 
 const maLichChon = ref('')
 const soNguoi = ref(1)
@@ -228,7 +238,7 @@ async function giuCho() {
     const data = await productService.chiTiet(maSanPham.value)
     lichKhaDung.value = data.lich_kha_dung || []
   } catch (e) {
-        thongBao.value =
+    thongBao.value =
       e.kiemTra?.so_nguoi?.[0] || e.message || 'Không giữ được chỗ, vui lòng thử lại.'
   } finally {
     dangGiuCho.value = false
@@ -328,6 +338,21 @@ onUnmounted(dungDemNguoc)
   margin: 0;
   color: var(--color-text-secondary);
   line-height: 1.6;
+}
+
+.description-section {
+  margin-bottom: var(--space-8);
+}
+
+.description-section h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-h2);
+}
+
+.description-section p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
 }
 
 .section-heading {
