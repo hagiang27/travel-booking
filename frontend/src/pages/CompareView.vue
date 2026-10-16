@@ -84,6 +84,13 @@
             >
               {{ dangDat ? 'Đang giữ chỗ...' : 'Đặt với nhà cung cấp này' }}
             </button>
+            <button
+              type="button"
+              class="nut-phu"
+              @click="themVaoGio(ket)"
+            >
+              Thêm vào giỏ
+            </button>
           </li>
         </ul>
 
@@ -100,11 +107,13 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { productService } from '../lib/productService'
 import { authService } from '../lib/authService'
 import { luuDonMock } from '../lib/donMock'
-import { productService } from '../lib/productService'
 import { MOCK_CHAO_GIA } from '../mock/mockOffers'
 import { laCuoiTuan, soSanhGia } from '../lib/gia'
+import { useGioHang } from '../lib/gioHang'
+const { them } = useGioHang()
 
 const route = useRoute()
 const router = useRouter()
@@ -188,6 +197,29 @@ async function datVoiChao(ket) {
   } finally {
     dangDat.value = false
   }
+}
+function themVaoGio(ket) {
+  thongBao.value = ''
+
+  const lichChon = lich.value.find((l) => l.ngay_khoi_hanh === ngayChon.value)
+  if (!lichChon) {
+    thongBao.value = 'Vui lòng chọn ngày khởi hành.'
+    return
+  }
+
+  const soNguoiHopLe = Math.min(30, Math.max(1, Number(soNguoi.value) || 1))
+
+  const duoc = them({
+    id: `${sp.value.ma_san_pham}-${ket.chao.ma_chao}-${ngayChon.value}`,
+    ma_san_pham: sp.value.ma_san_pham,
+    ten_san_pham: sp.value.ten_san_pham,
+    ma_lich: lichChon.ma_lich,
+    ngay_khoi_hanh: ngayChon.value,
+    so_nguoi: soNguoiHopLe,
+    chao: ket.chao,
+  })
+
+  thongBao.value = duoc ? 'Đã thêm vào giỏ.' : 'Mục này đã có trong giỏ.'
 }
 
 function formatNgay(ngay) {
@@ -384,5 +416,17 @@ function formatPrice(price) {
 .message {
   color: var(--color-warning);
   font-size: var(--font-size-small);
+}
+.nut-phu {
+  margin-top: var(--space-3);
+  margin-left: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
 }
 </style>
