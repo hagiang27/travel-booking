@@ -31,6 +31,15 @@
           Quản lý sản phẩm
         </button>
 
+        <button
+          v-if="user && user.vai_tro === 'khach_hang'"
+          type="button"
+          :class="{ active: route.path === '/gio-hang' }"
+          @click="router.push('/gio-hang')"
+        >
+          Giỏ hàng ({{ soMuc }})
+        </button>
+
         <template v-if="user">
           <span class="nguoi-dung" :title="user.ten_dang_nhap">
             {{ user.ho_ten }}
@@ -78,11 +87,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authService } from './lib/authService'
 import AppFooter from './components/AppFooter.vue'
+import { useGioHang } from './lib/gioHang'
 
 const route = useRoute()
 const router = useRouter()
 const isDark = ref(false)
 const user = ref(null)
+const { soMuc } = useGioHang()
 
 const coQuyenQuanTri = computed(() =>
   !!user.value && ['quan_tri', 'nha_cung_cap'].includes(user.value.vai_tro)

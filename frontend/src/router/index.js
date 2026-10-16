@@ -51,6 +51,12 @@ const routes = [
     name: 'not-found',
     component: () => import('../views/NotFound.vue'),
   },
+  {
+    path: '/gio-hang',
+    name: 'cart',
+    component: () => import('../views/CartView.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
