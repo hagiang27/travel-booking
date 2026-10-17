@@ -206,7 +206,7 @@ h1 {
 
 .the-chi-so {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -232,7 +232,7 @@ h1 {
 
 .khoi-bieu-do {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -314,7 +314,7 @@ canvas:focus-visible {
 
 @media (min-width: 1024px) {
   .khoi-bieu-do {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 </style>
