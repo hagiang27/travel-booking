@@ -1,5 +1,7 @@
 <template>
   <div class="app">
+    <a class="lien-bo-qua" href="#noi-dung-chinh">Bỏ qua điều hướng</a>
+
     <header class="header">
       <div class="brand">
         <h1>Nhà Việt</h1>
@@ -15,6 +17,7 @@
         </button>
 
         <button
+          v-if="!user || laKhach"
           type="button"
           :class="{ active: route.name === 'list' || route.name === 'detail' }"
           @click="router.push('/san-pham')"
@@ -23,12 +26,21 @@
         </button>
 
         <button
-          v-if="coQuyenQuanTri"
+          v-if="laNhaCungCap"
           type="button"
-          :class="{ active: route.path.startsWith('/quan-tri') }"
+          :class="{ active: route.path.startsWith('/quan-tri/san-pham') }"
           @click="router.push('/quan-tri/san-pham')"
         >
           Quản lý sản phẩm
+        </button>
+
+        <button
+          v-if="laQuanTri"
+          type="button"
+          :class="{ active: route.path.startsWith('/quan-tri/bang-dieu-khien') }"
+          @click="router.push('/quan-tri/bang-dieu-khien')"
+        >
+          Bảng điều khiển
         </button>
 
         <template v-if="user">
@@ -64,13 +76,12 @@
       </button>
     </header>
 
-        <main>
+    <main id="noi-dung-chinh">
       <router-view />
     </main>
 
     <AppFooter />
   </div>
-  
 </template>
 
 <script setup>
@@ -79,14 +90,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { authService } from './lib/authService'
 import AppFooter from './components/AppFooter.vue'
 
+const KHOA_THEME = 'theme'
+
 const route = useRoute()
 const router = useRouter()
 const isDark = ref(false)
 const user = ref(null)
 
-const coQuyenQuanTri = computed(() =>
-  !!user.value && ['quan_tri', 'nha_cung_cap'].includes(user.value.vai_tro)
-)
+const laKhach = computed(() => !!user.value && user.value.vai_tro === 'khach_hang')
+const laNhaCungCap = computed(() => !!user.value && user.value.vai_tro === 'nha_cung_cap')
+const laQuanTri = computed(() => !!user.value && user.value.vai_tro === 'quan_tri')
 
 async function taiNguoiDung() {
   user.value = await authService.layNguoiDungHienTai()
@@ -98,16 +111,28 @@ async function dangXuat() {
   router.push('/dang-nhap')
 }
 
+function apDungTheme(toi) {
+  isDark.value = toi
+  document.documentElement.setAttribute('data-theme', toi ? 'dark' : 'light')
+  try {
+    localStorage.setItem(KHOA_THEME, toi ? 'dark' : 'light')
+  } catch {
+    // trình duyệt chặn lưu trữ thì bỏ qua
+  }
+}
+
 function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.setAttribute(
-    'data-theme',
-    isDark.value ? 'dark' : 'light'
-  )
+  apDungTheme(!isDark.value)
 }
 
 onMounted(() => {
-  document.documentElement.setAttribute('data-theme', 'light')
+  let luu = null
+  try {
+    luu = localStorage.getItem(KHOA_THEME)
+  } catch {
+    // bỏ qua
+  }
+  apDungTheme(luu === 'dark')
   taiNguoiDung()
 })
 
@@ -122,6 +147,21 @@ watch(() => route.fullPath, taiNguoiDung)
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
+}
+
+.lien-bo-qua {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #000000;
+  border-radius: 6px;
+}
+
+.lien-bo-qua:focus {
+  left: 8px;
 }
 
 .header {
