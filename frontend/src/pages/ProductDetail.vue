@@ -9,7 +9,7 @@
         <p>Đang tải sản phẩm...</p>
       </div>
 
-      <div v-else-if="loi" class="empty-state">
+        <div v-else-if="loi" class="empty-state" role="alert">
         <h3>Không tải được sản phẩm</h3>
         <p>{{ loi }}</p>
       </div>
@@ -123,9 +123,15 @@
           </div>
         </section>
       </template>
+            <div v-else class="empty-state">
+        <h3>Không tìm thấy sản phẩm này</h3>
+        <p>Sản phẩm có thể đã bị gỡ hoặc đường dẫn không đúng.</p>
+        <RouterLink to="/san-pham" class="back-button">← Quay lại danh sách</RouterLink>
+      </div>
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { computed, onUnmounted, ref, watch } from 'vue'
