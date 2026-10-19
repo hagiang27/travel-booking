@@ -39,7 +39,13 @@ const routes = [
     path: '/quan-tri/san-pham',
     name: 'admin-products',
     component: () => import('../pages/AdminProducts.vue'),
-    meta: { requiresAuth: true, roles: ['quan_tri', 'nha_cung_cap'] },
+    meta: { requiresAuth: true, roles: ['nha_cung_cap'] },
+  },
+  {
+    path: '/quan-tri/bang-dieu-khien',
+    name: 'bang-dieu-khien',
+    component: () => import('../pages/AdminDashboard.vue'),
+    meta: { requiresAuth: true, roles: ['quan_tri'] },
   },
   {
     path: '/khong-co-quyen',
