@@ -20,6 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
         'role' => \App\Http\Middleware\EnsureRole::class
     ]);
 })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+   ->withExceptions(function (Exceptions $exceptions): void {
+    $exceptions->render(function (
+        \Illuminate\Validation\ValidationException $e,
+        \Illuminate\Http\Request $request
+    ) {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'loi' => $e->errors(),
+            ], 422);
+        }
+
+        return null;
+    });
+})->create();

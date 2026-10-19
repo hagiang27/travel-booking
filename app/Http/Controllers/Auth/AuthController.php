@@ -9,21 +9,26 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Đăng ký tài khoản mới
-     */
-    public function dangKy(Request $request)
-    {
-        $validated = $request->validate([
-            'ho_ten' => 'required|string|max:100',
-            'ten_dang_nhap' => 'required|string|max:80|unique:nguoi_dung,ten_dang_nhap',
-            'thu_dien_tu_mo_phong' => 'required|email|max:120|unique:nguoi_dung,thu_dien_tu_mo_phong',
-            'mat_khau' => 'required|string|min:6',
-            'vai_tro' => 'required|in:quan_tri,nha_cung_cap,khach_hang,huong_dan_vien,kiem_thu',
-        ]);
 
-        // Sinh mã người dùng dạng ND0001, ND0002,...
-        $soThuTu = DB::table('nguoi_dung')->count() + 1;
+/**
+ * Đăng ký tài khoản mới
+ * Tài khoản đăng ký công khai luôn có vai trò khach_hang.
+ */
+public function dangKy(Request $request)
+{
+    $validated = $request->validate([
+        'ho_ten' => 'required|string|max:100',
+        'ten_dang_nhap' => 'required|string|max:80|unique:nguoi_dung,ten_dang_nhap',
+        'thu_dien_tu_mo_phong' => 'required|email|max:120|unique:nguoi_dung,thu_dien_tu_mo_phong',
+        'mat_khau' => 'required|string|min:6',
+    ]);
+
+    $maNguoiDung = DB::transaction(function () use ($validated) {
+        // Khóa bảng trong lúc xác định mã tiếp theo.
+        // MySQL cần hỗ trợ transaction và khóa bảng phù hợp.
+        $soThuTu = DB::table('nguoi_dung')
+            ->lockForUpdate()
+            ->count() + 1;
 
         $maNguoiDung = 'ND' . str_pad(
             (string) $soThuTu,
@@ -32,7 +37,6 @@ class AuthController extends Controller
             STR_PAD_LEFT
         );
 
-        // Đảm bảo mã người dùng không bị trùng
         while (
             DB::table('nguoi_dung')
                 ->where('ma_nguoi_dung', $maNguoiDung)
@@ -47,6 +51,36 @@ class AuthController extends Controller
                 STR_PAD_LEFT
             );
         }
+
+        DB::table('nguoi_dung')->insert([
+            'ma_nguoi_dung' => $maNguoiDung,
+            'ho_ten' => $validated['ho_ten'],
+            'ten_dang_nhap' => $validated['ten_dang_nhap'],
+            'thu_dien_tu_mo_phong' => $validated['thu_dien_tu_mo_phong'],
+            'mat_khau_hash' => Hash::make($validated['mat_khau']),
+            'vai_tro' => 'khach_hang',
+            'ma_ncc' => null,
+            'so_dien_thoai_mo_phong' => null,
+            'so_thich' => null,
+            'ngay_tao' => now()->toDateString(),
+            'trang_thai' => 'kich_hoat',
+        ]);
+
+        return $maNguoiDung;
+    });
+
+    return response()->json([
+        'message' => 'Đăng ký thành công',
+        'user' => [
+            'ma_nguoi_dung' => $maNguoiDung,
+            'ho_ten' => $validated['ho_ten'],
+            'ten_dang_nhap' => $validated['ten_dang_nhap'],
+            'thu_dien_tu_mo_phong' => $validated['thu_dien_tu_mo_phong'],
+            'vai_tro' => 'khach_hang',
+            'trang_thai' => 'kich_hoat',
+        ],
+    ], 201);
+
 
         DB::table('nguoi_dung')->insert([
             'ma_nguoi_dung' => $maNguoiDung,
