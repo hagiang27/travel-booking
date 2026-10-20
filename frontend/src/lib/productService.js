@@ -223,10 +223,30 @@ const real = {
 
   async timKiemCongKhai(p = {}) {
     const query = new URLSearchParams()
-    for (const [k, v] of Object.entries(p)) {
-      if (coGiaTri(v)) query.set(k, v)
+  
+    if (coGiaTri(p.ma_diem_den)) {
+      query.set('ma_diem_den', p.ma_diem_den)
     }
-    return goi(`/api/v1/products?${query.toString()}`)
+  
+    if (coGiaTri(p.loai)) {
+      query.set('loai_san_pham', p.loai)
+    }
+  
+    if (coGiaTri(p.q)) {
+      query.set('q', p.q)
+    }
+  
+    query.set('page', String(p.trang || 1))
+    query.set('per_page', String(p.so_moi_trang || SO_MOI_TRANG_MAC_DINH))
+  
+    const res = await goi(`/api/v1/products?${query.toString()}`)
+  
+    return {
+      data: res.data || [],
+      tong_so: res.total || 0,
+      trang: res.current_page || 1,
+      so_moi_trang: res.per_page || SO_MOI_TRANG_MAC_DINH,
+    }
   },
 
   async chiTiet(ma) {
