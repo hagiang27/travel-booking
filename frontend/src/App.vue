@@ -1,7 +1,6 @@
 <template>
   <div class="app">
-    <a class="lien-bo-qua" href="#noi-dung-chinh">Bỏ qua điều hướng</a>
-
+  <a class="lien-bo-qua" href="#noi-dung-chinh">Bỏ qua điều hướng</a>
     <header class="header">
       <div class="brand">
         <h1>Nhà Việt</h1>
@@ -76,7 +75,8 @@
       </button>
     </header>
 
-    <main id="noi-dung-chinh">
+
+        <main id="noi-dung-chinh">
       <router-view />
     </main>
 
@@ -247,5 +247,19 @@ watch(() => route.fullPath, taiNguoiDung)
   .theme-button {
     padding: 0 var(--space-3);
   }
+}
+.lien-bo-qua {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #000000;
+  border-radius: 6px;
+}
+
+.lien-bo-qua:focus {
+  left: 8px;
 }
 </style>
