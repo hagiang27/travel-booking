@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\SanPhamController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
@@ -26,3 +26,5 @@ Route::middleware(['web', 'role:quan_tri'])->get('/v1/admin/test', function () {
         'vai_tro' => 'quan_tri'
     ]);
 });
+Route::get('/v1/products', [SanPhamController::class, 'index']);
+Route::get('/v1/products/{ma}', [SanPhamController::class, 'show']);
