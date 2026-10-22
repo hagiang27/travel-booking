@@ -34,6 +34,14 @@ class SanPhamController extends Controller
             );
         }
 
+        if ($request->filled('tinh_thanh')) {
+            $maDiemDen = DB::table('diem_den')
+                ->where('tinh_thanh', $request->query('tinh_thanh'))
+                ->pluck('ma_diem_den');
+
+            $query->whereIn('ma_diem_den', $maDiemDen);
+        }
+
         if ($request->filled('q')) {
             $query->where(
                 'ten_san_pham',

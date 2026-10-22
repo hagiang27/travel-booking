@@ -150,6 +150,12 @@ const loi = ref('')
 const trangHienTai = computed(() => Math.max(1, Number(route.query.trang) || 1))
 const tongTrang = computed(() => Math.max(1, Math.ceil(tongSo.value / soMoiTrang.value)))
 
+// Đổi mã điểm đến (ví dụ NB) thành tên tỉnh (ví dụ Ninh Bình) để khớp với database
+function tenTinhTheoMa(ma) {
+  const dd = DIEM_DEN.find((d) => d.value === ma)
+  return dd ? dd.label : ''
+}
+
 function dongBoFormTuUrl() {
   formDiemDen.value = route.query.ma_diem_den || ''
   formLoai.value = route.query.loai || ''
@@ -163,7 +169,7 @@ async function taiDanhSach() {
 
   try {
     const res = await productService.timKiemCongKhai({
-      ma_diem_den: route.query.ma_diem_den || '',
+      tinh_thanh: tenTinhTheoMa(route.query.ma_diem_den),
       loai: route.query.loai || '',
       gia_tu: route.query.gia_tu || '',
       gia_den: route.query.gia_den || '',
