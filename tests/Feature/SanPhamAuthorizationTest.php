@@ -17,10 +17,23 @@ class SanPhamAuthorizationTest extends TestCase
 
     public function test_customer_cannot_access_admin_route(): void
     {
+        SanPhamTestSchema::create();
+
+        DB::table('nguoi_dung')->insert([
+            'ma_nguoi_dung' => 'ND0001',
+            'ho_ten' => 'Khach hang test',
+            'ten_dang_nhap' => 'khach_test',
+            'thu_dien_tu_mo_phong' => 'khach_test@example.com',
+            'mat_khau_hash' => '',
+            'vai_tro' => 'khach_hang',
+            'ma_ncc' => null,
+            'ngay_tao' => '2026-10-23',
+            'trang_thai' => 'kich_hoat',
+        ]);
+
         $response = $this
             ->withSession([
                 'ma_nguoi_dung' => 'ND0001',
-                'vai_tro' => 'khach_hang',
             ])
             ->getJson('/api/v1/admin/test');
 
