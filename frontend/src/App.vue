@@ -141,6 +141,8 @@ watch(() => route.fullPath, taiNguoiDung)
 
 <style scoped>
 .app {
+  width: 100%;
+  max-width: none;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
