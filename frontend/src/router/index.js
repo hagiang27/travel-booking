@@ -24,6 +24,11 @@ const routes = [
     props: false,
   },
   {
+    path: '/gio-hang',
+    name: 'gio-hang',
+    component: () => import('../pages/GioHang.vue'),
+  },
+  {
     path: '/so-sanh/:slug',
     name: 'compare',
     component: () => import('../pages/CompareView.vue'),
@@ -65,8 +70,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const cанCheck = to.meta.requiresAuth || to.meta.roles
-  if (!cанCheck) return true
+  const yeuCauDangNhap = to.meta.requiresAuth || to.meta.roles
+  if (!yeuCauDangNhap) return true
 
   const nguoiDung = await authService.layNguoiDungHienTai()
 
