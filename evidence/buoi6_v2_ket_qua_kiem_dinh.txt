@@ -1,0 +1,14 @@
+KIEM DINH DU LIEU - V2 BUOI 6
+Database: travel_booking_dt01_recovery_test
+Cong ket noi: 3307
+Thoi diem kiem dinh: 2026-10-27 07:29:15
+Nguon: Ket qua truy van truc tiep tren database
+-------------------------------------------------------
+[DAT] San pham thieu nha cung cap (san_pham.ma_ncc): 0
+[DAT] San pham thieu diem den (san_pham.ma_diem_den): 0
+[DAT] San pham co gia co ban <= 0: 0
+[DAT] Lich kha dung co tong_cho < 0, da_dat < 0 hoac da_dat > tong_cho: 0
+[DAT] Lich kha dung co con_lai khong bang tong_cho - da_dat: 0
+-------------------------------------------------------
+Ket qua: 5/5 phep kiem dinh dat.
+Luu y: Ket qua chi ap dung cho database kiem thu neu tren.

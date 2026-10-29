@@ -1,0 +1,30 @@
+﻿BAO CAO DEM BAN GHI - CSE703073 - BUOI 6 V2
+Database: travel_booking_dt01_recovery_test
+Moi truong kiem tra: MariaDB, TCP port 3307
+Nguon: COUNT(*) truc tiep tren 15 bang nghiep vu.
+
+bang                 so_ban_ghi
+bai_viet             60
+chi_so_minh_bach_gia 3
+chi_tiet_don         365
+chinh_sach_phu_thu   3
+danh_gia             88
+diem_den             76
+don_dat              260
+gia_theo_mua         560
+lich_kha_dung        2150
+nguoi_dung           110
+nhat_ky_he_thong     200
+nha_cung_cap         24
+san_pham             140
+thanh_toan           209
+ty_gia_tien_te       3
+
+Tong so bang: 15
+Tong so dong cong don: 4251
+
+Luu y:
+- Tong 4251 la tong so dong cua 15 bang, khong phai so doi tuong du lich duy nhat.
+- Bang san_pham co 140 ban ghi, trong do 136 san pham dang ban.
+- Du lieu duoc kiem tra tren database thu nghiem cong 3307.
+- Khong tac dong database goc cong 3306.
