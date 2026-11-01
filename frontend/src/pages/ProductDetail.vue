@@ -85,16 +85,21 @@
 
           <div class="booking-form">
             <div class="form-group">
-              <label for="so-nguoi">Số người (1 đến 30)</label>
+              <label for="so-nguoi">Số người (1 đến {{ toiDaCho }})</label>
               <input
                 id="so-nguoi"
                 v-model.number="soNguoi"
                 type="number"
                 min="1"
-                max="30"
+                :max="toiDaCho"
                 :disabled="!!donTam"
+                @change="soNguoi = soNguoiHopLe"
               />
             </div>
+
+            <p v-if="lichDangChon" class="con-lai-hint">
+              Lịch đã chọn còn {{ lichDangChon.con_lai }} chỗ
+            </p>
 
             <p class="tam-tinh">Tạm tính: {{ formatPrice(tamTinh) }}</p>
 
@@ -165,7 +170,16 @@ const giayConLai = ref(0)
 
 let boDem = null
 
-const soNguoiHopLe = computed(() => Math.min(30, Math.max(1, Number(soNguoi.value) || 1)))
+// Lịch đang được chọn, dùng để giới hạn số người theo số chỗ còn lại
+const lichDangChon = computed(() =>
+  lichKhaDung.value.find((l) => l.ma_lich === maLichChon.value)
+)
+
+const toiDaCho = computed(() => Math.min(30, lichDangChon.value?.con_lai ?? 30))
+
+const soNguoiHopLe = computed(() =>
+  Math.min(toiDaCho.value, Math.max(1, Number(soNguoi.value) || 1))
+)
 
 const tamTinh = computed(() =>
   sp.value ? Number(sp.value.gia_co_ban) * soNguoiHopLe.value : 0
@@ -249,7 +263,7 @@ async function giuCho() {
     })
 
     donTam.value = don
-        const lichChon = lichKhaDung.value.find((l) => l.ma_lich === maLichChon.value)
+    const lichChon = lichKhaDung.value.find((l) => l.ma_lich === maLichChon.value)
     luuDonMock({
       ...don,
       ma_san_pham: sp.value.ma_san_pham,
@@ -488,6 +502,12 @@ onUnmounted(dungDemNguoc)
   font-size: var(--font-size-body);
 }
 
+.con-lai-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+
 .tam-tinh {
   margin: 0;
   font-weight: var(--font-weight-semibold);
@@ -567,6 +587,7 @@ onUnmounted(dungDemNguoc)
     font-size: var(--font-size-h2);
   }
 }
+
 .link-button {
   display: inline-flex;
   align-items: center;

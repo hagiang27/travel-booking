@@ -248,48 +248,75 @@ h2 {
 
 /* Hero */
 .hero {
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #38bdf8 100%);
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.5)),
+    url('/hero-banner.webp') center / cover no-repeat;
   color: #fff;
-  padding: 56px 16px 64px;
+  padding: 120px 16px 150px;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
 }
 
 .hero-noi-dung {
   max-width: 1120px;
+  width: 100%;
   margin: 0 auto;
+  text-align: center;
 }
 
 .hero-nhan {
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.8rem;
-  opacity: 0.85;
-  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: #fff;
+  opacity: 0.95;
+  margin: 0 0 16px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero h1 {
-  font-size: clamp(1.75rem, 4vw, 2.6rem);
-  line-height: 1.2;
-  margin: 0 0 12px;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1.15;
+  margin: 0 auto 16px;
   color: #fff;
-  max-width: 720px;
+  max-width: 820px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .hero-mo-ta {
-  max-width: 640px;
-  opacity: 0.92;
-  margin: 0 0 28px;
+  max-width: 680px;
+  margin: 0 auto 32px;
+  color: #fff;
+  font-size: 1.05rem;
+  opacity: 0.95;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+/* Sửa cỡ chữ hero và khung tìm kiếm */
+.hero h1 {
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-mo-ta {
+  font-size: 1rem;
 }
 
 .form-tim {
+  max-width: 980px;
+  margin: 0 auto;
   background: #fff;
   color: #1f2937;
   border-radius: 14px;
-  padding: 16px;
+  padding: 18px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
   align-items: end;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+  text-align: left;
 }
 
 .form-tim label {
@@ -302,6 +329,8 @@ h2 {
 
 .form-tim select,
 .form-tim input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -320,7 +349,6 @@ h2 {
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  text-decoration: none;
   text-align: center;
   display: inline-block;
 }
@@ -328,6 +356,34 @@ h2 {
 .btn-chinh:hover {
   background: #ea580c;
 }
+
+/* Hero */
+.hero {
+  width: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 0;
+  padding: 96px 24px 40px;
+  border-radius: 16px;
+}
+
+.hero-noi-dung {
+  max-width: 1280px;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  max-width: 1000px;
+}
+
+.hero-mo-ta {
+  max-width: 800px;
+}
+
+.form-tim {
+  max-width: 1200px;
+}
+
 
 /* Loại dịch vụ */
 .loai-grid {
