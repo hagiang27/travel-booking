@@ -50,10 +50,19 @@ class SanPhamController extends Controller
             );
         }
 
-        return response()->json(
-            $query->orderBy('ma_san_pham')
-                ->paginate($soMoiTrang)
-        );
+        $trang = $query->orderBy('ma_san_pham')
+            ->paginate($soMoiTrang);
+
+        // Gắn tên nhà cung cấp vào từng sản phẩm trong trang
+        $tenNhaCungCap = DB::table('nha_cung_cap')
+            ->pluck('ten_ncc', 'ma_ncc');
+
+        $trang->getCollection()->transform(function ($sanPham) use ($tenNhaCungCap) {
+            $sanPham->ten_nha_cung_cap = $tenNhaCungCap[$sanPham->ma_ncc] ?? null;
+            return $sanPham;
+        });
+
+        return response()->json($trang);
     }
 
     /**
@@ -78,10 +87,17 @@ class SanPhamController extends Controller
             ->orderBy('ngay_khoi_hanh')
             ->get();
 
+        $tenNhaCungCap = DB::table('nha_cung_cap')
+            ->where('ma_ncc', $sanPham->ma_ncc)
+            ->value('ten_ncc');
+
         return response()->json(
             array_merge(
                 $sanPham->toArray(),
-                ['lich_kha_dung' => $lichKhaDung]
+                [
+                    'ten_nha_cung_cap' => $tenNhaCungCap,
+                    'lich_kha_dung' => $lichKhaDung,
+                ]
             )
         );
     }

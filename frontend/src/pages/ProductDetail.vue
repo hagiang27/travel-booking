@@ -16,11 +16,23 @@
 
       <template v-else-if="sp">
         <section class="product-detail">
-          <div class="product-image">Ảnh sản phẩm</div>
+                    <div class="product-image">
+            <img
+              v-if="!anhLoiHoanToan"
+              :src="anhHienTai"
+              :alt="sp.ten_san_pham"
+              class="anh-bia"
+              @error="chuyenAnhDuPhong"
+            />
+            <span v-else>Ảnh sản phẩm</span>
+          </div>
 
           <div class="product-info">
             <p class="product-code">Mã sản phẩm: {{ sp.ma_san_pham }}</p>
             <h1>{{ sp.ten_san_pham }}</h1>
+            <p v-if="sp.ten_nha_cung_cap" class="product-supplier">
+              Nhà cung cấp: {{ sp.ten_nha_cung_cap }}
+            </p>
             <p class="product-price">{{ formatPrice(sp.gia_co_ban) }} / khách</p>
 
             <div class="policy-box">
@@ -80,7 +92,7 @@
 
         <section class="booking-section">
           <div class="section-heading">
-            <h2>Giữ chỗ</h2>
+            <h2>{{ laKhachHang ? 'Đặt tour' : 'Giữ chỗ' }}</h2>
           </div>
 
           <div class="booking-form">
@@ -103,7 +115,23 @@
 
             <p class="tam-tinh">Tạm tính: {{ formatPrice(tamTinh) }}</p>
 
+            <template v-if="laKhachHang">
+              <button
+                type="button"
+                class="booking-button"
+                :disabled="!maLichChon"
+                @click="themGioHang"
+              >
+                Thêm vào giỏ hàng
+              </button>
+
+              <RouterLink to="/gio-hang" class="booking-button link-button">
+                Xem giỏ hàng
+              </RouterLink>
+            </template>
+
             <button
+              v-else
               type="button"
               class="booking-button"
               :disabled="!maLichChon || !!donTam || dangGiuCho"
@@ -112,10 +140,13 @@
               {{ dangGiuCho ? 'Đang giữ chỗ...' : 'Giữ chỗ 15 phút' }}
             </button>
 
-            <p v-if="thongBao" class="message" role="status">{{ thongBao }}</p>
+            <p v-if="laKhachHang && thongBaoGio" class="message message--ok" role="status">
+              {{ thongBaoGio }}
+            </p>
+            <p v-else-if="thongBao" class="message" role="status">{{ thongBao }}</p>
           </div>
 
-          <div v-if="donTam" class="hold-box" role="status">
+          <div v-if="donTam && !laKhachHang" class="hold-box" role="status">
             <h3>Đã giữ chỗ. Mã đơn: {{ donTam.ma_don }}</h3>
             <p>Thời gian còn lại để thanh toán: <strong>{{ phutConLai }}</strong></p>
             <p>Tổng tạm tính: {{ formatPrice(donTam.tong_tien) }}</p>
@@ -133,10 +164,11 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { productService } from '../lib/productService'
 import { authService } from '../lib/authService'
+import { themVaoGio } from '../lib/gioHang'
 import { MO_TA } from '../mock/mockDescriptions'
 import { luuDonMock } from '../lib/donMock'
 
@@ -150,15 +182,47 @@ const sp = ref(null)
 const lichKhaDung = ref([])
 const dangTai = ref(false)
 const loi = ref('')
+const nguoiDung = ref(null)
+
+// Khách hàng đặt tour qua giỏ hàng, không giữ chỗ 15 phút
+const laKhachHang = computed(() => nguoiDung.value?.vai_tro === 'khach_hang')
 
 const moTa = computed(
   () => MO_TA[sp.value?.ma_san_pham] || 'Đang cập nhật mô tả cho sản phẩm này.'
 )
 
+const ANH_THEO_LOAI = {
+  'Dịch vụ trải nghiệm': 'dich-vu-trai-nghiem.jpg',
+  'Lưu trú': 'luu-tru.jpg',
+  'Tour trọn gói': 'tour-tron-goi.jpg',
+  'Vận chuyển': 'van-chuyen.jpg',
+  'Vé tham quan': 've-tham-quan.jpg',
+}
+
+// 0: ảnh riêng theo mã, 1: ảnh mặc định theo loại, 2: không có ảnh
+const buocAnh = ref(0)
+
+const anhHienTai = computed(() => {
+  if (!sp.value) return ''
+  if (buocAnh.value === 0) return `/anh-san-pham/${sp.value.ma_san_pham}.jpg`
+  return `/anh-san-pham/${ANH_THEO_LOAI[sp.value.loai_san_pham] || 'dich-vu-trai-nghiem.jpg'}`
+})
+
+const anhLoiHoanToan = computed(() => buocAnh.value >= 2)
+
+function chuyenAnhDuPhong() {
+  buocAnh.value += 1
+}
+
+watch(sp, () => {
+  buocAnh.value = 0
+})
+
 const maLichChon = ref('')
 const soNguoi = ref(1)
 const dangGiuCho = ref(false)
 const thongBao = ref('')
+const thongBaoGio = ref('')
 const donTam = ref(null)
 const giayConLai = ref(0)
 
@@ -185,6 +249,10 @@ const phutConLai = computed(() => {
   return `${phut}:${giay}`
 })
 
+onMounted(async () => {
+  nguoiDung.value = await authService.layNguoiDungHienTai()
+})
+
 async function taiChiTiet() {
   dangTai.value = true
   loi.value = ''
@@ -208,6 +276,7 @@ watch(
     maLichChon.value = ''
     donTam.value = null
     thongBao.value = ''
+    thongBaoGio.value = ''
     dungDemNguoc()
     taiChiTiet()
   },
@@ -238,11 +307,33 @@ function dungDemNguoc() {
   }
 }
 
+function themGioHang() {
+  thongBaoGio.value = ''
+
+  if (!lichDangChon.value) {
+    thongBaoGio.value = 'Vui lòng chọn lịch khởi hành trước.'
+    return
+  }
+
+  themVaoGio({
+    ma_lich: lichDangChon.value.ma_lich,
+    ma_san_pham: sp.value.ma_san_pham,
+    ten_san_pham: sp.value.ten_san_pham,
+    ten_nha_cung_cap: sp.value.ten_nha_cung_cap || sp.value.ma_ncc || '',
+    ngay_khoi_hanh: lichDangChon.value.ngay_khoi_hanh,
+    so_nguoi: soNguoiHopLe.value,
+    gia_1_nguoi: Number(sp.value.gia_co_ban),
+    con_lai: lichDangChon.value.con_lai,
+  })
+
+  thongBaoGio.value = 'Đã thêm vào giỏ hàng.'
+}
+
 async function giuCho() {
   thongBao.value = ''
 
-  const nguoiDung = await authService.layNguoiDungHienTai()
-  if (!nguoiDung) {
+  const dangNhap = await authService.layNguoiDungHienTai()
+  if (!dangNhap) {
     router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
@@ -348,6 +439,12 @@ onUnmounted(dungDemNguoc)
   margin: 0 0 var(--space-4);
   font-size: var(--font-size-h1);
   line-height: 1.2;
+}
+
+.product-supplier {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
 }
 
 .product-price {
@@ -529,6 +626,10 @@ onUnmounted(dungDemNguoc)
   font-size: var(--font-size-small);
 }
 
+.message--ok {
+  color: var(--color-success, var(--color-primary));
+}
+
 .hold-box {
   margin-top: var(--space-6);
   padding: var(--space-4);
@@ -588,5 +689,14 @@ onUnmounted(dungDemNguoc)
   justify-content: center;
   margin-top: var(--space-3);
   text-decoration: none;
+}
+.anh-bia {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-lg);
 }
 </style>
