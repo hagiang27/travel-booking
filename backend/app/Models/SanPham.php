@@ -33,4 +33,22 @@ class SanPham extends Model
         'trang_thai',
         'ngay_tao',
     ];
+
+    public function diemDen()
+    {
+        return $this->belongsTo(
+            DiemDen::class,
+            'ma_diem_den',
+            'ma_diem_den'
+        );
+    }
+
+    public function lichKhaDung()
+    {
+        return $this->hasMany(
+            LichKhaDung::class,
+            'ma_san_pham',
+            'ma_san_pham'
+        );
+    }
 }

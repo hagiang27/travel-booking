@@ -48,9 +48,18 @@ const CACH_DUNG = [
   { so: '3', tieu_de: 'Giữ chỗ và đặt', noi_dung: 'Giữ chỗ trong 15 phút và hoàn tất thanh toán.' },
 ]
 
+const ANH_THEO_LOAI = {
+  'Dịch vụ trải nghiệm': 'dich-vu-trai-nghiem.jpg',
+  'Lưu trú': 'luu-tru.jpg',
+  'Tour trọn gói': 'tour-tron-goi.jpg',
+  'Vận chuyển': 'van-chuyen.jpg',
+  'Vé tham quan': 've-tham-quan.jpg',
+}
+
 const sanPhamNoiBat = ref([])
 const dangTai = ref(true)
 const loiTai = ref('')
+const buocAnh = ref({})
 
 function layTen(sp) {
   return sp.ten_san_pham ?? sp.ten ?? sp.ma_san_pham
@@ -60,6 +69,20 @@ function layGia(sp) {
   const gia = sp.gia_tu ?? sp.gia
   if (gia == null) return ''
   return Number(gia).toLocaleString('vi-VN') + ' đ'
+}
+
+function anhCua(sp) {
+  const buoc = buocAnh.value[sp.ma_san_pham] || 0
+  if (buoc === 0) return `/anh-san-pham/${sp.ma_san_pham}.jpg`
+  if (buoc === 1) {
+    const file = ANH_THEO_LOAI[sp.loai_san_pham] || 'dich-vu-trai-nghiem.jpg'
+    return `/anh-san-pham/${file}`
+  }
+  return ''
+}
+
+function chuyenAnhDuPhong(sp) {
+  buocAnh.value[sp.ma_san_pham] = (buocAnh.value[sp.ma_san_pham] || 0) + 1
 }
 
 function timKiem() {
@@ -173,7 +196,16 @@ onMounted(async () => {
           :to="`/san-pham/${sp.ma_san_pham}`"
           class="sp-the"
         >
-          <div class="sp-anh">{{ sp.ma_san_pham }}</div>
+          <div class="sp-anh">
+            <img
+              v-if="anhCua(sp)"
+              :src="anhCua(sp)"
+              :alt="layTen(sp)"
+              loading="lazy"
+              @error="chuyenAnhDuPhong(sp)"
+            />
+            <span v-else>{{ sp.ma_san_pham }}</span>
+          </div>
           <div class="sp-noi-dung">
             <h3>{{ layTen(sp) }}</h3>
             <p v-if="sp.diem_danh_gia_tb > 0" class="sp-danh-gia">★ {{ sp.diem_danh_gia_tb }}</p>
@@ -221,24 +253,13 @@ onMounted(async () => {
 }
 
 .khoi {
-  max-width: 1120px;
   width: 100%;
-  margin: 0 auto;
-  padding: 40px 16px;
   box-sizing: border-box;
+  padding: 40px max(16px, calc((100% - 1120px) / 2 + 16px));
 }
 
 .khoi-nen {
   background: var(--surface, #f5f7fb);
-  max-width: none;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.khoi-nen > * {
-  max-width: 1120px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 h2 {
@@ -359,12 +380,12 @@ h2 {
 
 /* Hero */
 .hero {
-  width: auto;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   min-height: 0;
   padding: 96px 24px 40px;
-  border-radius: 16px;
+  border-radius: 0;
 }
 
 .hero-noi-dung {
@@ -519,14 +540,23 @@ h2 {
 }
 
 .sp-anh {
-  height: 120px;
-  background: linear-gradient(135deg, #bfdbfe, #7dd3fc);
+  height: 170px;
+  padding: 0;
+  background: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   font-weight: 700;
   color: #1e3a8a;
   letter-spacing: 0.05em;
+}
+
+.sp-anh img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .sp-noi-dung {

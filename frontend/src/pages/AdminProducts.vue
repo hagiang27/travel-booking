@@ -168,7 +168,7 @@ async function taiDanhSach() {
   loi.value = ''
   try {
     const ket = await productService.danhSach()
-    danhSach.value = ket.data
+    danhSach.value = ket.du_lieu?.data ?? ket.data ?? []
   } catch (e) {
     loi.value = e.message || 'Có lỗi xảy ra.'
   } finally {

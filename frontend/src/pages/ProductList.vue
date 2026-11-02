@@ -60,7 +60,16 @@
 
         <div v-else-if="danhSach.length" class="product-grid">
           <article v-for="sp in danhSach" :key="sp.ma_san_pham" class="product-card">
-            <div class="product-image">Ảnh sản phẩm</div>
+            <div class="product-image">
+              <img
+                v-if="anhCua(sp)"
+                :src="anhCua(sp)"
+                :alt="sp.ten_san_pham"
+                loading="lazy"
+                @error="chuyenAnhDuPhong(sp)"
+              />
+              <span v-else>Ảnh sản phẩm</span>
+            </div>
 
             <div class="product-content">
               <h3>{{ sp.ten_san_pham }}</h3>
@@ -134,6 +143,15 @@ const LOAI = [
   { value: 'experience', label: 'Trải nghiệm' },
 ]
 
+// Ảnh dự phòng theo loại sản phẩm
+const ANH_THEO_LOAI = {
+  'Dịch vụ trải nghiệm': 'dich-vu-trai-nghiem.jpg',
+  'Lưu trú': 'luu-tru.jpg',
+  'Tour trọn gói': 'tour-tron-goi.jpg',
+  'Vận chuyển': 'van-chuyen.jpg',
+  'Vé tham quan': 've-tham-quan.jpg',
+}
+
 // Giá trị đang chọn trong form (chưa áp dụng)
 const formDiemDen = ref('')
 const formLoai = ref('')
@@ -147,6 +165,9 @@ const soMoiTrang = ref(12)
 const dangTai = ref(false)
 const loi = ref('')
 
+// Số lần ảnh của từng sản phẩm bị lỗi: 0 = ảnh riêng, 1 = ảnh loại, 2 = hết ảnh
+const buocAnh = ref({})
+
 const trangHienTai = computed(() => Math.max(1, Number(route.query.trang) || 1))
 const tongTrang = computed(() => Math.max(1, Math.ceil(tongSo.value / soMoiTrang.value)))
 
@@ -154,6 +175,20 @@ const tongTrang = computed(() => Math.max(1, Math.ceil(tongSo.value / soMoiTrang
 function tenTinhTheoMa(ma) {
   const dd = DIEM_DEN.find((d) => d.value === ma)
   return dd ? dd.label : ''
+}
+
+function anhCua(sp) {
+  const buoc = buocAnh.value[sp.ma_san_pham] || 0
+  if (buoc === 0) return `/anh-san-pham/${sp.ma_san_pham}.jpg`
+  if (buoc === 1) {
+      const file = ANH_THEO_LOAI[sp.loai_san_pham] || 'dich-vu-trai-nghiem.jpg'
+    return file ? `/anh-san-pham/${file}` : ''
+  }
+  return ''
+}
+
+function chuyenAnhDuPhong(sp) {
+  buocAnh.value[sp.ma_san_pham] = (buocAnh.value[sp.ma_san_pham] || 0) + 1
 }
 
 function dongBoFormTuUrl() {
@@ -178,6 +213,7 @@ async function taiDanhSach() {
     danhSach.value = res.data || []
     tongSo.value = res.tong_so || 0
     soMoiTrang.value = res.so_moi_trang || 12
+    buocAnh.value = {}
   } catch (e) {
     danhSach.value = []
     tongSo.value = 0
@@ -344,6 +380,13 @@ function formatPrice(price) {
   aspect-ratio: 16 / 10;
   background: var(--color-surface-2);
   color: var(--color-text-muted);
+}
+
+.product-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .product-content {
