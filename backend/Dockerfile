@@ -1,6 +1,6 @@
 FROM php:8.3-fpm-alpine
 
-RUN apk add --no-cache git unzip libzip-dev icu-dev oniguruma-dev \
+RUN apk add --no-cache git unzip ca-certificates libzip-dev icu-dev oniguruma-dev \
  && docker-php-ext-install pdo_mysql mbstring zip intl
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -10,3 +10,4 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
  && chown -R www-data:www-data storage bootstrap/cache
+CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
