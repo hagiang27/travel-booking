@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\SanPhamController;
 use App\Http\Controllers\DatTourController;
 use App\Http\Controllers\Admin\SanPhamAdminController;
+use App\Services\PythonDataService;
 
 // API mặc định của Laravel
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -18,6 +19,14 @@ Route::post('/v1/register', [AuthController::class, 'dangKy']);
 // API xem danh sách và chi tiết sản phẩm công khai
 Route::get('/v1/products', [SanPhamController::class, 'index']);
 Route::get('/v1/products/{ma_san_pham}', [SanPhamController::class, 'show']);
+
+// Gợi ý sản phẩm tương tự (lấy từ python-service, trả về [] nếu không khả dụng)
+Route::get('/v1/products/{ma_san_pham}/goi-y', function (string $ma_san_pham, PythonDataService $pythonData) {
+    return response()->json([
+        'ma_san_pham' => $ma_san_pham,
+        'goi_y' => $pythonData->recommend($ma_san_pham),
+    ]);
+})->where('ma_san_pham', '[A-Za-z0-9]{1,10}');
 
 // Các API sử dụng session
 Route::middleware('web')->group(function () {

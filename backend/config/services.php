@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'python' => [
+        'url' => env('PY_SERVICE_URL', 'http://127.0.0.1:8001'),
+        'token' => env('PY_SERVICE_TOKEN'),
+        'timeout' => env('PY_SERVICE_TIMEOUT', 3),
+    ],
+
 ];
