@@ -258,10 +258,11 @@ const real = {
     return data.data ?? data
   },
 
-  async giuCho({ ma_san_pham, ma_lich, so_nguoi }) {
+  // SỬA: backend nhận ma_lich và so_luong (không phải so_nguoi)
+  async giuCho({ ma_lich, so_nguoi }) {
     const data = await goi('/api/v1/bookings', {
       method: 'POST',
-      body: { ma_san_pham, ma_lich, so_nguoi },
+      body: { ma_lich, so_luong: Number(so_nguoi) || 1 },
     })
     return data.data ?? data
   },
