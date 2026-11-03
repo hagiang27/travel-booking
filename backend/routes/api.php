@@ -46,6 +46,15 @@ Route::middleware('web')->group(function () {
         ]);
     });
 
+    // Thống kê mùa vụ cho admin (lấy từ python-service)
+    Route::middleware('role:quan_tri')->get('/v1/admin/thong-ke/mua-vu', function (PythonDataService $pythonData) {
+        $muaVu = $pythonData->seasonality();
+        return response()->json([
+            'dang_hoat_dong' => !empty($muaVu),
+            'mua_vu' => $muaVu,
+        ]);
+    });
+
     // API quản lý sản phẩm của quản trị viên và nhà cung cấp
     Route::middleware('role:quan_tri,nha_cung_cap')
         ->prefix('/v1/admin/products')
