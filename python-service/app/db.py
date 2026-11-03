@@ -10,6 +10,11 @@ load_dotenv()
 _engine = None
 
 
+def _connect_args():
+    ca = os.getenv("DB_SSL_CA")
+    return {"ssl": {"ca": ca}} if ca else {}
+
+
 def _get_engine():
     global _engine
     if _engine is None:
@@ -22,7 +27,9 @@ def _get_engine():
             database=os.getenv("DB_DATABASE", "travel_booking_dt02"),
             query={"charset": "utf8mb4"},
         )
-        _engine = create_engine(url, pool_pre_ping=True)
+        _engine = create_engine(
+            url, pool_pre_ping=True, connect_args=_connect_args()
+        )
     return _engine
 
 
