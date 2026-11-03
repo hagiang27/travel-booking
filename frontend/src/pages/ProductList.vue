@@ -129,18 +129,20 @@ import { productService } from '../lib/productService'
 const route = useRoute()
 const router = useRouter()
 
+// value: mã dùng trên URL. slug: tên không dấu khớp với đường dẫn tỉnh trong database
 const DIEM_DEN = [
-  { value: 'HN', label: 'Hà Nội' },
-  { value: 'NB', label: 'Ninh Bình' },
-  { value: 'QN', label: 'Quảng Ninh' },
+  { value: 'HN', label: 'Hà Nội', slug: 'ha-noi' },
+  { value: 'NB', label: 'Ninh Bình', slug: 'ninh-binh' },
+  { value: 'QN', label: 'Quảng Ninh', slug: 'quang-ninh' },
 ]
 
+// value: đúng với giá trị loai_san_pham trong database
 const LOAI = [
-  { value: 'tour', label: 'Tour' },
-  { value: 'stay', label: 'Lưu trú' },
-  { value: 'transfer', label: 'Đưa đón' },
-  { value: 'ticket', label: 'Vé tham quan' },
-  { value: 'experience', label: 'Trải nghiệm' },
+  { value: 'Tour trọn gói', label: 'Tour trọn gói' },
+  { value: 'Lưu trú', label: 'Lưu trú' },
+  { value: 'Vận chuyển', label: 'Vận chuyển' },
+  { value: 'Vé tham quan', label: 'Vé tham quan' },
+  { value: 'Dịch vụ trải nghiệm', label: 'Dịch vụ trải nghiệm' },
 ]
 
 // Ảnh dự phòng theo loại sản phẩm
@@ -171,17 +173,17 @@ const buocAnh = ref({})
 const trangHienTai = computed(() => Math.max(1, Number(route.query.trang) || 1))
 const tongTrang = computed(() => Math.max(1, Math.ceil(tongSo.value / soMoiTrang.value)))
 
-// Đổi mã điểm đến (ví dụ NB) thành tên tỉnh (ví dụ Ninh Bình) để khớp với database
-function tenTinhTheoMa(ma) {
+// Đổi mã điểm đến (ví dụ NB) thành slug không dấu (ví dụ ninh-binh) để khớp với database
+function slugTheoMa(ma) {
   const dd = DIEM_DEN.find((d) => d.value === ma)
-  return dd ? dd.label : ''
+  return dd ? dd.slug : ''
 }
 
 function anhCua(sp) {
   const buoc = buocAnh.value[sp.ma_san_pham] || 0
   if (buoc === 0) return `/anh-san-pham/${sp.ma_san_pham}.jpg`
   if (buoc === 1) {
-      const file = ANH_THEO_LOAI[sp.loai_san_pham] || 'dich-vu-trai-nghiem.jpg'
+    const file = ANH_THEO_LOAI[sp.loai_san_pham] || 'dich-vu-trai-nghiem.jpg'
     return file ? `/anh-san-pham/${file}` : ''
   }
   return ''
@@ -204,7 +206,7 @@ async function taiDanhSach() {
 
   try {
     const res = await productService.timKiemCongKhai({
-      tinh_thanh: tenTinhTheoMa(route.query.ma_diem_den),
+      tinh_thanh: slugTheoMa(route.query.ma_diem_den),
       loai: route.query.loai || '',
       gia_tu: route.query.gia_tu || '',
       gia_den: route.query.gia_den || '',
@@ -310,184 +312,3 @@ function formatPrice(price) {
   min-height: 42px;
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: var(--font-size-body);
-}
-
-.filter-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.btn-primary,
-.btn-ghost {
-  min-height: 42px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.btn-primary {
-  border: none;
-  background: var(--color-primary);
-  color: var(--color-bg);
-}
-
-.btn-ghost {
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-}
-
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.section-heading h2 {
-  margin: 0;
-  font-size: var(--font-size-h2);
-}
-
-.section-heading span {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6);
-}
-
-.product-card {
-  overflow: hidden;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.product-image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 16 / 10;
-  background: var(--color-surface-2);
-  color: var(--color-text-muted);
-}
-
-.product-image img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.product-content {
-  padding: var(--space-4);
-}
-
-.product-content h3 {
-  min-height: 48px;
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-h3);
-}
-
-.product-rating {
-  margin-bottom: var(--space-2);
-  color: var(--color-warning);
-  font-size: var(--font-size-small);
-}
-
-.product-price {
-  margin: 0 0 var(--space-4);
-  color: var(--color-primary);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-}
-
-.detail-button {
-  display: block;
-  width: 100%;
-  min-height: 42px;
-  line-height: 42px;
-  box-sizing: border-box;
-  text-align: center;
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: var(--color-bg);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  text-decoration: none;
-}
-
-.detail-button:hover {
-  background: var(--color-primary-hover);
-}
-
-.empty-state {
-  padding: var(--space-12);
-  text-align: center;
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-
-.empty-state h3 {
-  margin: 0 0 var(--space-2);
-}
-
-.empty-state p {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-8);
-}
-
-.pagination button {
-  min-height: 40px;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (max-width: 900px) {
-  .filter-section {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .filter-section {
-    grid-template-columns: 1fr;
-  }
-
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

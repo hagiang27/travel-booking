@@ -236,6 +236,15 @@ const real = {
       query.set('loai_san_pham', p.loai)
     }
 
+    // Backend nhận gia_min, gia_max
+    if (coGiaTri(p.gia_tu)) {
+      query.set('gia_min', p.gia_tu)
+    }
+
+    if (coGiaTri(p.gia_den)) {
+      query.set('gia_max', p.gia_den)
+    }
+
     if (coGiaTri(p.q)) {
       query.set('q', p.q)
     }
@@ -258,7 +267,7 @@ const real = {
     return data.data ?? data
   },
 
-  // SỬA: backend nhận ma_lich và so_luong (không phải so_nguoi)
+  // Backend nhận ma_lich và so_luong (không phải so_nguoi)
   async giuCho({ ma_lich, so_nguoi }) {
     const data = await goi('/api/v1/bookings', {
       method: 'POST',
