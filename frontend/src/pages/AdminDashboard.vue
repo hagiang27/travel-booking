@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import * as XLSX from 'xlsx'
 
 const chiSo = [
@@ -57,6 +57,47 @@ const diemDen = [
   { ten: 'Phú Quốc', doanhThu: 61 },
   { ten: 'Đắk Lắk', doanhThu: 45 },
 ]
+
+// Phân tích mùa vụ lấy từ python-service qua Laravel
+const muaVu = ref([])
+const dangTaiMuaVu = ref(true)
+const loiMuaVu = ref('')
+
+const cotMuaVu = computed(() =>
+  muaVu.value.map((m) => ({ ...m, pct: Math.round(m.ti_le_lap_day * 100) }))
+)
+
+async function taiMuaVu() {
+  dangTaiMuaVu.value = true
+  loiMuaVu.value = ''
+
+  try {
+    const res = await fetch('/api/v1/admin/thong-ke/mua-vu', {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    })
+
+    if (res.status === 401 || res.status === 403) {
+      loiMuaVu.value = 'Cần đăng nhập bằng tài khoản quản trị để xem phân tích mùa vụ.'
+      return
+    }
+    if (!res.ok) {
+      throw new Error('HTTP ' + res.status)
+    }
+
+    const data = await res.json()
+    muaVu.value = data.mua_vu || []
+    if (!data.dang_hoat_dong) {
+      loiMuaVu.value = 'Python-service chưa sẵn sàng hoặc chưa có dữ liệu mùa vụ.'
+    }
+  } catch {
+    loiMuaVu.value = 'Không tải được phân tích mùa vụ.'
+  } finally {
+    dangTaiMuaVu.value = false
+  }
+}
+
+onMounted(taiMuaVu)
 
 function dinhDang(so) {
   return new Intl.NumberFormat('vi-VN').format(so)
@@ -217,7 +258,21 @@ function xuatExcel() {
       </div>
     </section>
 
-    <p class="ghi-chu-python">Phân tích mùa vụ (mô-đun Python): đang chờ V3, tạm chưa hiển thị.</p>
+    <section class="the">
+      <h2>Tỷ lệ lấp đầy chỗ theo tháng (phân tích mùa vụ)</h2>
+      <p v-if="dangTaiMuaVu" class="ghi-chu">Đang tải dữ liệu...</p>
+      <p v-else-if="loiMuaVu" class="ghi-chu-python">{{ loiMuaVu }}</p>
+      <p v-else-if="!cotMuaVu.length" class="ghi-chu-python">Chưa có dữ liệu mùa vụ.</p>
+      <div v-else class="mua-vu-luoi">
+        <div v-for="m in cotMuaVu" :key="m.thang" class="o-mua-vu">
+          <span class="mua-vu-thang">{{ m.thang }}</span>
+          <div class="mua-vu-nen">
+            <div class="mua-vu-tien" :style="{ width: m.pct + '%' }"></div>
+          </div>
+          <span class="mua-vu-pct">{{ m.pct }}% ({{ m.da_dat }}/{{ m.tong_cho }} chỗ)</span>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -448,6 +503,33 @@ h2 {
   text-align: right;
   color: #334155;
 }
+.mua-vu-luoi {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.o-mua-vu {
+  display: grid;
+  grid-template-columns: 70px 1fr 200px;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+.mua-vu-nen {
+  background: #f1f5f9;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+.mua-vu-tien {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 999px;
+}
+.mua-vu-pct {
+  text-align: right;
+  color: #334155;
+}
 .ghi-chu-python {
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
@@ -475,6 +557,13 @@ h2 {
     grid-template-columns: 90px 1fr;
   }
   .so-tien {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+  .o-mua-vu {
+    grid-template-columns: 60px 1fr;
+  }
+  .mua-vu-pct {
     grid-column: 1 / -1;
     text-align: left;
   }

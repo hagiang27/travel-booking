@@ -9,14 +9,14 @@
         <p>Đang tải sản phẩm...</p>
       </div>
 
-        <div v-else-if="loi" class="empty-state" role="alert">
+      <div v-else-if="loi" class="empty-state" role="alert">
         <h3>Không tải được sản phẩm</h3>
         <p>{{ loi }}</p>
       </div>
 
       <template v-else-if="sp">
         <section class="product-detail">
-                    <div class="product-image">
+          <div class="product-image">
             <img
               v-if="!anhLoiHoanToan"
               :src="anhHienTai"
@@ -49,6 +49,21 @@
         <section class="description-section">
           <h2>Mô tả</h2>
           <p>{{ moTa }}</p>
+        </section>
+
+        <section v-if="goiY.length" class="related-section">
+          <h2>Sản phẩm tương tự</h2>
+          <div class="related-list">
+            <RouterLink
+              v-for="item in goiY"
+              :key="item.ma_san_pham"
+              :to="`/san-pham/${item.ma_san_pham}`"
+              class="related-card"
+            >
+              <strong>{{ item.ten_san_pham }}</strong>
+              <span>{{ formatPrice(item.gia_co_ban) }} / khách</span>
+            </RouterLink>
+          </div>
         </section>
 
         <section class="schedule-section">
@@ -159,7 +174,8 @@
           </div>
         </section>
       </template>
-            <div v-else class="empty-state">
+
+      <div v-else class="empty-state">
         <h3>Không tìm thấy sản phẩm này</h3>
         <p>Sản phẩm có thể đã bị gỡ hoặc đường dẫn không đúng.</p>
         <RouterLink to="/san-pham" class="back-button">← Quay lại danh sách</RouterLink>
@@ -231,6 +247,7 @@ const thongBao = ref('')
 const thongBaoGio = ref('')
 const donTam = ref(null)
 const giayConLai = ref(0)
+const goiY = ref([])
 
 let boDem = null
 
@@ -267,12 +284,27 @@ async function taiChiTiet() {
     const data = await productService.chiTiet(maSanPham.value)
     sp.value = data
     lichKhaDung.value = data.lich_kha_dung || []
+    taiGoiY(data.ma_san_pham)
   } catch (e) {
     sp.value = null
     lichKhaDung.value = []
     loi.value = e.status === 404 ? 'Sản phẩm không tồn tại.' : e.message
   } finally {
     dangTai.value = false
+  }
+}
+
+async function taiGoiY(ma) {
+  goiY.value = []
+  try {
+    const res = await fetch(`/api/v1/products/${ma}/goi-y`, {
+      headers: { Accept: 'application/json' },
+    })
+    if (!res.ok) return
+    const data = await res.json()
+    goiY.value = data.goi_y || []
+  } catch {
+    goiY.value = []
   }
 }
 
@@ -502,6 +534,40 @@ onUnmounted(dungDemNguoc)
   line-height: 1.7;
 }
 
+.related-section {
+  margin-bottom: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.related-section h2 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-h2);
+}
+
+.related-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.related-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.related-card span {
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+}
+
 .section-heading {
   margin-bottom: var(--space-4);
 }
@@ -696,6 +762,7 @@ onUnmounted(dungDemNguoc)
   margin-top: var(--space-3);
   text-decoration: none;
 }
+
 .anh-bia {
   display: block;
   width: 100%;
