@@ -5,19 +5,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-use App\Http\Controllers\AuthController;
 
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+Route::middleware(['role:quan_tri'])
+    ->prefix('quan-tri')
+    ->group(function () {
+        Route::get('/kiem-tra', function () {
+            return 'Xin chao quan tri vien';
+        });
+    });
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
-
-Route::get('/admin', function () {
-    return view('admin');
-})->middleware(['auth', 'role:quan_tri'])->name('admin');
+Route::middleware(['role:nha_cung_cap,quan_tri'])
+    ->prefix('nha-cung-cap')
+    ->group(function () {
+        Route::get('/kiem-tra', function () {
+            return 'Xin chao nha cung cap';
+        });
+    });
